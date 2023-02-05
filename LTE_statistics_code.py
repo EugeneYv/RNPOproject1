@@ -26,7 +26,7 @@ list_2 = [ 'PS traffic 4G, GB', 'Cell Availability 4G, %', 'Total LTE Cells Numb
            'UE Uplink Av Thrp', 'E-RAB Setup SR, %', 'E-RAB Drop Rate', 'Inter-Freq HO Out SR,%', 'Intra-Freq HO Out SR,%', \
            'CSFB to WCDMA', 'CSFB to GERAN', 'RRS setup SR,%', 'CCSR, %']
 
-# Genicheck cluster
+# GG cluster
 list_cluster = ['LABEL=UH29813, CellIndex=883, CGI=25094C3507475', 'LABEL=UH29812, CellIndex=882, CGI=25094C3507474', \
                 'LABEL=UH29811, CellIndex=881, CGI=25094C3507473', 'LABEL=UH19473, CellIndex=880, CGI=25094C3504C11', \
                 'LABEL=UH19472, CellIndex=879, CGI=25094C3504C10', 'LABEL=UH19471, CellIndex=878, CGI=25094C3504C0F', \
@@ -46,7 +46,7 @@ list_cluster = ['LABEL=UH29813, CellIndex=883, CGI=25094C3507475', 'LABEL=UH2981
                 'LABEL=UH08212, CellIndex=255, CGI=25094C3502014', \
                 'LABEL=UH08211, CellIndex=254, CGI=25094C3502013', \
                 'LABEL=UH39253, CellIndex=312, CGI=25094C3509955', ]
-# фильтрация по скластеру:
+# фильтрация по кластеру:
 sts_df = sts_df[sts_df['GCELL'].isin(list_cluster)]
 
 # обработка daily:

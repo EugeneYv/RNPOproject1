@@ -21,7 +21,7 @@ list_2 = ['TRX Availability 2G %', 'TRXs Number', 'TCH traffic 2G, Erl', 'SDCCH 
           'TCH Congestion including handover, %', 'SDCCH Drop Rate, %', 'TCH Assignment Failure Rate, %', 'TCH traffic HalfRate, Erl', 'TCH Drop Rate, %', \
           'Handover Success Rate, %', 'Immediate assignment SR, %', 'Call completion success rate, %']
 
-# Genicheck cluster
+# G cluster
 list_cluster = ['LABEL=UH29813, CellIndex=883, CGI=25094C3507475', 'LABEL=UH29812, CellIndex=882, CGI=25094C3507474', \
                 'LABEL=UH29811, CellIndex=881, CGI=25094C3507473', 'LABEL=UH19473, CellIndex=880, CGI=25094C3504C11', \
                 'LABEL=UH19472, CellIndex=879, CGI=25094C3504C10', 'LABEL=UH19471, CellIndex=878, CGI=25094C3504C0F', \
@@ -41,8 +41,8 @@ list_cluster = ['LABEL=UH29813, CellIndex=883, CGI=25094C3507475', 'LABEL=UH2981
                 'LABEL=UH08212, CellIndex=255, CGI=25094C3502014', \
                 'LABEL=UH08211, CellIndex=254, CGI=25094C3502013', \
                 'LABEL=UH39253, CellIndex=312, CGI=25094C3509955', ]
-# Каховка
-list_cluster_Kahovka = ['LABEL=UH29813, CellIndex=883, CGI=25094C3507475', \
+# K cluster
+list_cluster_K = ['LABEL=UH29813, CellIndex=883, CGI=25094C3507475', \
                 'LABEL=UH29812, CellIndex=882, CGI=25094C3507474', \
                 'LABEL=UH29811, CellIndex=881, CGI=25094C3507473', \
                 'LABEL=UH19473, CellIndex=880, CGI=25094C3504C11', \

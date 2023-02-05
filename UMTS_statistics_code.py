@@ -52,8 +52,8 @@ list_2 = ['CS traffic 3G, Erl','PS traffic 3G UL+DL, GB','CS RAB Drop Rate (%)',
           'RRC Assignment SucessRate (CS BH), %','RRC Assignment SucessRate (PS BH), %','RRC Drop Rate (CS BH), %','RRC Drop Rate (PS BH), %',\
           'RAB Assignment Success Rate (CS), %','RAB Assignment Success Rate (PS), %','CCSR CS,%','CCSR PS,%'] # пока не нужен
 
-# кластер Каховка:
-list_cluster_Kahovka = ['Label=UH0881_U94, CellID=48814, LogicRNCID=501', \
+# кластер К:
+list_cluster_K = ['Label=UH0881_U94, CellID=48814, LogicRNCID=501', \
                         'Label=UH0881_U96, CellID=48816, LogicRNCID=501', \
                         'Label=UH0881_U95, CellID=48815, LogicRNCID=501', \
                         'Label=UH0821_U96, CellID=48216, LogicRNCID=501', \
@@ -100,8 +100,8 @@ list_cluster_Kahovka = ['Label=UH0881_U94, CellID=48814, LogicRNCID=501', \
                         'Label=UH0821_U97, CellID=48217, LogicRNCID=501', \
                         'Label=UH0821_U99, CellID=48219, LogicRNCID=501']
 
-# Genicheck cluster
-list_cluster_Genicheck = ['Label=UH0881_U94, CellID=48814, LogicRNCID=501', \
+# G cluster
+list_cluster_G = ['Label=UH0881_U94, CellID=48814, LogicRNCID=501', \
                 'Label=UH0881_U96, CellID=48816, LogicRNCID=501', \
                 'Label=UH0881_U95, CellID=48815, LogicRNCID=501', \
                 'Label=UH0821_U96, CellID=48216, LogicRNCID=501', \
