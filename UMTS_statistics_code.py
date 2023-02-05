@@ -1,16 +1,16 @@
-import pandas as pd
+﻿import pandas as pd
 import winsound
 ''' количество активных сот 538!!! - используется для расчёта скорости HSDPA HSUPA,  для CityK 43
 вывод посуточной статистики для UMTS. импортный файл - в МАЕ вывести в формате xlsx два файла, потом в экселе сложить слева на право и переделать в csv
 '''
-active_cell_number = 538  # количество активных сот !!!!
+active_cell_number = 44  # количество активных сот !!!!
 
 
 #sts1 = pd.read_csv("C:/test/3G_counters1(2023-01-09.csv", sep=";", header=7, na_values='NIL') # вариант импорта 1
 #sts2 = pd.read_csv("C:/test/3G_counters2(2023-01-09_.csv", sep=";", header=7, na_values='NIL') # вариант импорта 1
 #sts_df = pd.merge(sts1, sts2, how="left", on="Start Time") # вариант импорта 1
 #sts_df = pd.read_csv("C:/test/sts3G/3G_counters1_9_15.csv", sep=";", header=7, na_values='NIL') #  вариант импорта 2
-sts_df = pd.read_csv("C:/work/CityH_audit/sts/3G/3G_09-30.01.csv", sep=";", header=7, na_values='NIL') #  вариант импорта для CityK
+sts_df = pd.read_csv("C:/work/Herson_audit/sts/3G/Kahovka/3G_Kahovka_1_22-01.02.csv", sep=";", header=7, na_values='NIL') #  вариант импорта для CityK
 sts_df['date'] = sts_df['Start Time'].str.split(' ').str[0]
 sts_df['hour'] = sts_df['Start Time'].str.split(' ').str[1]
 sts_df.to_excel("C:/test/sts3G/sts_df.xls", engine='openpyxl', sheet_name='Book2')
@@ -47,12 +47,113 @@ list_1 = ['RRC.AttConnEstab.EmgCall (None)','RRC.AttConnEstab.OrgConvCall (None)
           'RRC.AttConnRelDCCH.DSCR (None)','RRC.AttConnRelDCCH.UsrInact (None)','RRC.AttConnRelCCCH.DSCR (None)','RRC.AttConnRelDCCH.Norm (None)',\
           'RRC.AttConnRelCCCH.Norm (None)','RRC.AttConnRelCCCH.UsrInact (None)']
 
-# обработка daily:
-daily_df = sts_df.groupby(['date'])[list_1]. sum().reset_index()
 list_2 = ['CS traffic 3G, Erl','PS traffic 3G UL+DL, GB','CS RAB Drop Rate (%)','PS Blocking Rate (%)','PS RAB Drop Rate (%)','PS HS- Drop Rate (%)',\
           'HSDPA Throughput, kbps','HSUPA Throughput, kbps','Soft Handover Success rate, %','Hard Handover Success rate, %','CS W2G Inter-RAT Handover Out SR',\
           'RRC Assignment SucessRate (CS BH), %','RRC Assignment SucessRate (PS BH), %','RRC Drop Rate (CS BH), %','RRC Drop Rate (PS BH), %',\
           'RAB Assignment Success Rate (CS), %','RAB Assignment Success Rate (PS), %','CCSR CS,%','CCSR PS,%'] # пока не нужен
+
+# кластер Каховка:
+list_cluster_Kahovka = ['Label=UH0881_U94, CellID=48814, LogicRNCID=501', \
+                        'Label=UH0881_U96, CellID=48816, LogicRNCID=501', \
+                        'Label=UH0881_U95, CellID=48815, LogicRNCID=501', \
+                        'Label=UH0821_U96, CellID=48216, LogicRNCID=501', \
+                        'Label=UH0821_U95, CellID=48215, LogicRNCID=501', \
+                        'Label=UH0821_U94, CellID=48214, LogicRNCID=501', \
+                        'Label=UH2981_U4, CellID=29814, LogicRNCID=501', \
+                        'Label=UH2981_U3, CellID=29813, LogicRNCID=501', \
+                        'Label=UH2981_U2, CellID=29812, LogicRNCID=501', \
+                        'Label=UH2981_U6, CellID=29816, LogicRNCID=501', \
+                        'Label=UH2981_U5, CellID=29815, LogicRNCID=501', \
+                        'Label=UH1947_U3, CellID=19473, LogicRNCID=501', \
+                        'Label=UH1947_U2, CellID=19472, LogicRNCID=501', \
+                        'Label=UH2981_U1, CellID=29811, LogicRNCID=501', \
+                        'Label=UH1947_U6, CellID=19476, LogicRNCID=501', \
+                        'Label=UH1947_U5, CellID=19475, LogicRNCID=501', \
+                        'Label=UH1947_U4, CellID=19474, LogicRNCID=501', \
+                        'Label=UH1947_U1, CellID=19471, LogicRNCID=501', \
+                        'Label=UH3925_U1, CellID=39251, LogicRNCID=501', \
+                        'Label=UH3925_U6, CellID=39256, LogicRNCID=501', \
+                        'Label=UH3925_U5, CellID=39255, LogicRNCID=501', \
+                        'Label=UH3925_U4, CellID=39254, LogicRNCID=501', \
+                        'Label=UH3925_U3, CellID=39253, LogicRNCID=501', \
+                        'Label=UH3925_U2, CellID=39252, LogicRNCID=501', \
+                        'Label=UH0970_U3, CellID=9703, LogicRNCID=501', \
+                        'Label=UH0970_U6, CellID=9706, LogicRNCID=501', \
+                        'Label=UH0970_U5, CellID=9705, LogicRNCID=501', \
+                        'Label=UH0970_U4, CellID=9704, LogicRNCID=501', \
+                        'Label=UH0881_U3, CellID=8813, LogicRNCID=501', \
+                        'Label=UH0970_U2, CellID=9702, LogicRNCID=501', \
+                        'Label=UH0970_U1, CellID=9701, LogicRNCID=501', \
+                        'Label=UH0881_U6, CellID=8816, LogicRNCID=501', \
+                        'Label=UH0881_U5, CellID=8815, LogicRNCID=501', \
+                        'Label=UH0821_U4, CellID=8214, LogicRNCID=501', \
+                        'Label=UH0821_U2, CellID=8212, LogicRNCID=501', \
+                        'Label=UH0821_U1, CellID=8211, LogicRNCID=501', \
+                        'Label=UH0881_U4, CellID=8814, LogicRNCID=501', \
+                        'Label=UH0821_U3, CellID=8213, LogicRNCID=501', \
+                        'Label=UH0881_U2, CellID=8812, LogicRNCID=501', \
+                        'Label=UH0881_U1, CellID=8811, LogicRNCID=501', \
+                        'Label=UH0821_U6, CellID=8216, LogicRNCID=501', \
+                        'Label=UH0821_U5, CellID=8215, LogicRNCID=501', \
+                        'Label=UH0881_U97, CellID=48817, LogicRNCID=501', \
+                        'Label=UH0821_U98, CellID=48218, LogicRNCID=501', \
+                        'Label=UH0821_U97, CellID=48217, LogicRNCID=501', \
+                        'Label=UH0821_U99, CellID=48219, LogicRNCID=501']
+
+# Genicheck cluster
+list_cluster_Genicheck = ['Label=UH0881_U94, CellID=48814, LogicRNCID=501', \
+                'Label=UH0881_U96, CellID=48816, LogicRNCID=501', \
+                'Label=UH0881_U95, CellID=48815, LogicRNCID=501', \
+                'Label=UH0821_U96, CellID=48216, LogicRNCID=501', \
+                'Label=UH0821_U95, CellID=48215, LogicRNCID=501', \
+                'Label=UH0821_U94, CellID=48214, LogicRNCID=501', \
+                'Label=UH2981_U4, CellID=29814, LogicRNCID=501', \
+                'Label=UH2981_U3, CellID=29813, LogicRNCID=501', \
+                'Label=UH2981_U2, CellID=29812, LogicRNCID=501', \
+                'Label=UH2981_U6, CellID=29816, LogicRNCID=501', \
+                'Label=UH2981_U5, CellID=29815, LogicRNCID=501', \
+                'Label=UH1947_U3, CellID=19473, LogicRNCID=501', \
+                'Label=UH1947_U2, CellID=19472, LogicRNCID=501', \
+                'Label=UH2981_U1, CellID=29811, LogicRNCID=501', \
+                'Label=UH1947_U6, CellID=19476, LogicRNCID=501', \
+                'Label=UH1947_U5, CellID=19475, LogicRNCID=501', \
+                'Label=UH1947_U4, CellID=19474, LogicRNCID=501', \
+                'Label=UH1947_U1, CellID=19471, LogicRNCID=501', \
+                'Label=UH3925_U1, CellID=39251, LogicRNCID=501', \
+                'Label=UH3925_U6, CellID=39256, LogicRNCID=501', \
+                'Label=UH3925_U5, CellID=39255, LogicRNCID=501', \
+                'Label=UH3925_U4, CellID=39254, LogicRNCID=501', \
+                'Label=UH3925_U3, CellID=39253, LogicRNCID=501', \
+                'Label=UH3925_U2, CellID=39252, LogicRNCID=501', \
+                'Label=UH0970_U3, CellID=9703, LogicRNCID=501', \
+                'Label=UH0970_U6, CellID=9706, LogicRNCID=501', \
+                'Label=UH0970_U5, CellID=9705, LogicRNCID=501', \
+                'Label=UH0970_U4, CellID=9704, LogicRNCID=501', \
+                'Label=UH0881_U3, CellID=8813, LogicRNCID=501', \
+                'Label=UH0970_U2, CellID=9702, LogicRNCID=501', \
+                'Label=UH0970_U1, CellID=9701, LogicRNCID=501', \
+                'Label=UH0881_U6, CellID=8816, LogicRNCID=501', \
+                'Label=UH0881_U5, CellID=8815, LogicRNCID=501', \
+                'Label=UH0821_U4, CellID=8214, LogicRNCID=501', \
+                'Label=UH0821_U2, CellID=8212, LogicRNCID=501', \
+                'Label=UH0821_U1, CellID=8211, LogicRNCID=501', \
+                'Label=UH0881_U4, CellID=8814, LogicRNCID=501', \
+                'Label=UH0821_U3, CellID=8213, LogicRNCID=501', \
+                'Label=UH0881_U2, CellID=8812, LogicRNCID=501', \
+                'Label=UH0881_U1, CellID=8811, LogicRNCID=501', \
+                'Label=UH0821_U6, CellID=8216, LogicRNCID=501', \
+                'Label=UH0821_U5, CellID=8215, LogicRNCID=501', \
+                'Label=UH0881_U97, CellID=48817, LogicRNCID=501', \
+                'Label=UH0821_U98, CellID=48218, LogicRNCID=501', \
+                'Label=UH0821_U97, CellID=48217, LogicRNCID=501', \
+                'Label=UH0821_U99, CellID=48219, LogicRNCID=501']
+# фильтрация по скластеру:
+sts_df = sts_df[sts_df['GCELL'].isin(list_cluster)]
+
+
+# обработка daily:
+daily_df = sts_df.groupby(['date'])[list_1]. sum().reset_index()
+
 daily_df['CS traffic 3G, Erl'] = daily_df['CS Voice Traffic Volume (Erl)']
 daily_df['PS traffic 3G UL+DL, GB'] = (daily_df['VS.HSUPA.MeanChThroughput.TotalBytes (byte)'] + daily_df['VS.PS.Bkg.DL.8.Traffic (bit)'] + daily_df['VS.PS.Bkg.DL.16.Traffic (bit)'] + \
                                       daily_df['VS.PS.Bkg.DL.32.Traffic (bit)'] + daily_df['VS.PS.Bkg.DL.64.Traffic (bit)'] + daily_df['VS.PS.Bkg.DL.128.Traffic (bit)'] + \
@@ -193,7 +294,7 @@ hourlyPS_df = hourlyPS_df.transpose()
 #daily_df.to_excel("C:/test/sts3G/daily_df.xls", engine='openpyxl', sheet_name='Book2')
 #hourlyCS_df.to_excel("C:/test/sts3G/hourly_df.xls", engine='openpyxl', sheet_name='Book2')
 
-with pd.ExcelWriter('C:/work/CityH_audit/sts/3G/3G_01-30.01_output.xls', engine='openpyxl') as writer: # C:/work/CityH_audit/sts/3G/Kahovka/3G_Kahovka_1_09_30.xls C:/test/sts3G/19-15_bh_newupd.xls
+with pd.ExcelWriter('C:/work/Herson_audit/sts/3G/Kahovka/3G_Kahovka_1_22-01.02output.xls', engine='openpyxl') as writer: # C:/work/CityH_audit/sts/3G/Kahovka/3G_Kahovka_1_09_30.xls C:/test/sts3G/19-15_bh_newupd.xls
     daily_df.to_excel(writer, sheet_name='daily')
     hourlyCS_df.to_excel(writer, sheet_name='busy_hourCS')
     hourlyPS_df.to_excel(writer, sheet_name='busy_hourPS')
