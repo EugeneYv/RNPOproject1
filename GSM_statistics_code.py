@@ -1,17 +1,16 @@
 import pandas as pd
 import winsound
-import matplotlib.pyplot as plt
 '''вывод посуточной статистики для GSM. импортный файл - в МАЕ вывести в формате xlsx, потом в экселе переделать в csv'''
 
-directory = 'C:/work/Herson_audit/sts/2G/'
-csv_name = '2G_countersCS(2023-02-15'
+directory = 'C:/work/sts/2G/'
+csv_name = '2G_countersCS(2023-02-27'
 output_comment = '_output'  # что добавится в конце к названию файла
 
+#sts_df = pd.read_excel(f"{directory}{csv_name}.xlsx", header=7)
 sts_df = pd.read_csv(f"{directory}{csv_name}.csv", sep=";", header=7)
-#sts_df = pd.read_csv("C:/work/Herson_audit/sts/2G/2G_K_24-02.02.csv", sep=";", header=7)
+
 sts_df['date'] = sts_df['Start Time'].str.split(' ').str[0]
 sts_df['hour'] = sts_df['Start Time'].str.split(' ').str[1]
-
 sts_df['date'] = pd.to_datetime(sts_df['date'])
 sts_df['week'] = sts_df['date'].dt.isocalendar().week
 
@@ -29,7 +28,6 @@ list_2 = ['TRX Availability 2G %', 'TRXs Number', 'TCH traffic 2G, Erl', 'SDCCH 
           'TCH Congestion including handover, %', 'SDCCH Drop Rate, %', 'TCH Assignment Failure Rate, %', 'TCH traffic HalfRate, Erl', 'TCH Drop Rate, %', \
           'Handover Success Rate, %', 'Immediate assignment SR, %', 'Call completion success rate, %']
 
-# cluster_Gen
 list_cluster_Gen = ['LABEL=UH29813, CellIndex=883, CGI=25094C3507475', 'LABEL=UH29812, CellIndex=882, CGI=25094C3507474', \
                 'LABEL=UH29811, CellIndex=881, CGI=25094C3507473', 'LABEL=UH19473, CellIndex=880, CGI=25094C3504C11', \
                 'LABEL=UH19472, CellIndex=879, CGI=25094C3504C10', 'LABEL=UH19471, CellIndex=878, CGI=25094C3504C0F', \
@@ -48,8 +46,7 @@ list_cluster_Gen = ['LABEL=UH29813, CellIndex=883, CGI=25094C3507475', 'LABEL=UH
                 'LABEL=UH08813, CellIndex=268, CGI=25094C350226D', \
                 'LABEL=UH08212, CellIndex=255, CGI=25094C3502014', \
                 'LABEL=UH08211, CellIndex=254, CGI=25094C3502013', \
-                'LABEL=UH39253, CellIndex=312, CGI=25094C3509955', ]
-# cluster_Kah
+                'LABEL=UH39253, CellIndex=312, CGI=25094C3509955', ]  # кластер
 list_cluster_Kah = ['LABEL=UH29813, CellIndex=883, CGI=25094C3507475', \
                 'LABEL=UH29812, CellIndex=882, CGI=25094C3507474', \
                 'LABEL=UH29811, CellIndex=881, CGI=25094C3507473', \
@@ -73,7 +70,7 @@ list_cluster_Kah = ['LABEL=UH29813, CellIndex=883, CGI=25094C3507475', \
                 'LABEL=UH08813, CellIndex=268, CGI=25094C350226D', \
                 'LABEL=UH08212, CellIndex=255, CGI=25094C3502014', \
                 'LABEL=UH08211, CellIndex=254, CGI=25094C3502013', \
-                'LABEL=UH39253, CellIndex=312, CGI=25094C3509955']
+                'LABEL=UH39253, CellIndex=312, CGI=25094C3509955']  # кластер
 list_cluster_1800 =[
 'LABEL=UH39282, CellIndex=1119, CGI=25094C3509972', \
 'LABEL=UH39962, CellIndex=965, CGI=25094C3509C1A', \
@@ -512,7 +509,7 @@ list_cluster_1800 =[
 'LABEL=UH07661, CellIndex=537, CGI=25094C3501DED', \
 'LABEL=UH07422, CellIndex=874, CGI=25094C3501CFE', \
 'LABEL=UH05081, CellIndex=910, CGI=25094C35013D9'
-]
+]  # кластер
 list_cluster_900 = [
     'LABEL=UH27096, CellIndex=1307, CGI=25094C35069D8', \
     'LABEL=UH07614, CellIndex=1294, CGI=25094C3501DBE', \
@@ -805,9 +802,8 @@ list_cluster_900 = [
     'LABEL=UH08796, CellIndex=1309, CGI=25094C350225C', \
     'LABEL=UH08794, CellIndex=1308, CGI=25094C350225A', \
     'LABEL=UH08795, CellIndex=865, CGI=25094C350225B', \
-    'LABEL=UH08805, CellIndex=705, CGI=25094C3502265']
-# фильтрация по кластеру:
-#sts_df = sts_df[sts_df['GCELL'].isin(list_cluster_900)]
+    'LABEL=UH08805, CellIndex=705, CGI=25094C3502265']  # кластер
+
 
 # обработка weekly:
 weekly_df = sts_df.groupby(['week'])[list_1]. sum().reset_index()
@@ -842,7 +838,7 @@ weekly_df['CCSR2G, %']= weekly_df['Immediate assignment SR, %'] * (100 - weekly_
 weekly_df = weekly_df.drop(list_1, axis=1)
 weekly_df = weekly_df.transpose()
 
-# обработка daily:
+# ===обработка daily===
 daily_df = sts_df.groupby(['date'])[list_1]. sum().reset_index()
 daily_df['TRX Availability 2G %'] = daily_df['S3656:Number of available TRXs in a cell (None)'] / daily_df['S3655:Number of configured TRXs in a cell (None)'] * 100
 daily_df['TRXs Number'] = daily_df['S3656:Number of available TRXs in a cell (None)'] / 24
@@ -873,9 +869,81 @@ daily_df['Immediate assignment SR, %']= daily_df['K3003:Successful SDCCH Seizure
 daily_df['CCSR2G, %']= daily_df['Immediate assignment SR, %'] * (100 - daily_df['SDCCH Drop Rate, %']) * (100 - daily_df['TCH Assignment Failure Rate, %'])\
                                              * (100 - daily_df['TCH Drop Rate, %']) / 1000000
 daily_df = daily_df.drop(list_1, axis=1)
-daily_df = daily_df.transpose()
 
-# обработка hourly
+# фильтрация по кластеру 900:
+sts_df900 = sts_df[sts_df['GCELL'].isin(list_cluster_900)]
+daily_df900 = sts_df900.groupby(['date'])[list_1]. sum().reset_index()
+
+daily_df900['TRX Availability 2G %_900'] = daily_df900['S3656:Number of available TRXs in a cell (None)'] / daily_df900['S3655:Number of configured TRXs in a cell (None)'] * 100
+daily_df900['TRXs Number_900'] = daily_df900['S3656:Number of available TRXs in a cell (None)'] / 24
+daily_df900['TCH traffic 2G, Erl_900']= daily_df900['K3014:Traffic Volume on TCH (Erl)']
+daily_df900['SDCCH taffic, Erl_900']= daily_df900['K3004:Traffic Volume on SDCCH (Erl)']
+daily_df900['SDCCH Congesstion, %_900']= daily_df900['K3001:Failed SDCCH Seizures due to Busy SDCCH (None)'] / daily_df900['K3003:Successful SDCCH Seizures (None)'] * 100
+daily_df900['TCH Congestion excluding handover, %_900']= (daily_df900['K3011A:Failed TCH Seizures due to Busy TCH (Traffic Channel) (None)']+ \
+                                                   daily_df900['K3021:Failed TCH Seizures due to Busy TCH (Signaling Channel) (None)'])/\
+                                                  (daily_df900['K3020:TCH Seizure Requests (Signaling Channel) (None)'] + daily_df900['K3010A:TCH Seizure Requests (Traffic Channel) (None)'])*100
+daily_df900['TCH Congestion including handover, %_900']=(daily_df900['K3011A:Failed TCH Seizures due to Busy TCH (Traffic Channel) (None)']+ \
+                                                   daily_df900['K3021:Failed TCH Seizures due to Busy TCH (Signaling Channel) (None)'] + \
+                                                  daily_df900['K3011B:Failed TCH Seizures in TCH Handovers due to Busy TCH (Traffic Channel) (None)'])/\
+                                                  (daily_df900['K3020:TCH Seizure Requests (Signaling Channel) (None)'] + \
+                                                   daily_df900['K3010A:TCH Seizure Requests (Traffic Channel) (None)']+ \
+                                                   daily_df900['K3010B:TCH Seizure Requests in TCH Handovers (Traffic Channel) (None)'])*100
+daily_df900['SDCCH Drop Rate, %_900']= daily_df900['CM30:Call Drops on SDCCH (None)'] / daily_df900['K3003:Successful SDCCH Seizures (None)'] * 100
+daily_df900['TCH Assignment Failure Rate, %_900']= (1 - daily_df900['K3013A:Successful TCH Seizures (Traffic Channel) (None)'] / daily_df900['K3010A:TCH Seizure Requests (Traffic Channel) (None)'])*100
+daily_df900['TCH traffic HalfRate, Erl_900']= daily_df900['K3034:TCHH Traffic Volume (Erl)']
+daily_df900['TCH Drop Rate, %_900']= daily_df900['CM33:Call Drops on Traffic Channel (None)']/ \
+                              (daily_df900['K3013A:Successful TCH Seizures (Traffic Channel) (None)'] + \
+                               daily_df900['K3013B:Successful TCH Seizures in TCH handovers (Traffic Channel) (None)'] + \
+                               daily_df900['K3023:Successful TCH Seizures (Signaling Channel) (None)'])*100
+daily_df900['Handover Success Rate, %_900']= (daily_df900['CH333:Successful Outgoing External Inter-Cell Handovers (None)']+\
+                                       daily_df900['CH313:Number of Successful Outgoing Internal Inter-Cell Handovers (None)'])/\
+                                      (daily_df900['CH310:Number of Outgoing Internal Inter-Cell Handover Requests (None)']+\
+                                       daily_df900['CH330:Outgoing External Inter-Cell Handover Requests (None)']) * 100
+daily_df900['Immediate assignment SR, %_900']= daily_df900['K3003:Successful SDCCH Seizures (None)']  / daily_df900['K3000:SDCCH Seizure Requests (None)'] *100
+daily_df900['CCSR2G, %_900']= daily_df900['Immediate assignment SR, %_900'] * (100 - daily_df900['SDCCH Drop Rate, %_900']) * (100 - daily_df900['TCH Assignment Failure Rate, %_900'])\
+                                             * (100 - daily_df900['TCH Drop Rate, %_900']) / 1000000
+daily_df900 = daily_df900.drop(list_1, axis=1)
+#daily_df900 = daily_df900.transpose()
+
+# фильтрация по кластеру 1800:
+sts_df1800 = sts_df[sts_df['GCELL'].isin(list_cluster_1800)]
+
+daily_df1800 = sts_df1800.groupby(['date'])[list_1]. sum().reset_index()
+daily_df1800['TRX Availability 2G %_1800'] = daily_df1800['S3656:Number of available TRXs in a cell (None)'] / daily_df1800['S3655:Number of configured TRXs in a cell (None)'] * 100
+daily_df1800['TRXs Number_1800'] = daily_df1800['S3656:Number of available TRXs in a cell (None)'] / 24
+daily_df1800['TCH traffic 2G, Erl_1800']= daily_df1800['K3014:Traffic Volume on TCH (Erl)']
+daily_df1800['SDCCH taffic, Erl_1800']= daily_df1800['K3004:Traffic Volume on SDCCH (Erl)']
+daily_df1800['SDCCH Congesstion, %_1800']= daily_df1800['K3001:Failed SDCCH Seizures due to Busy SDCCH (None)'] / daily_df1800['K3003:Successful SDCCH Seizures (None)'] * 100
+daily_df1800['TCH Congestion excluding handover, %_1800']= (daily_df1800['K3011A:Failed TCH Seizures due to Busy TCH (Traffic Channel) (None)']+ \
+                                                   daily_df1800['K3021:Failed TCH Seizures due to Busy TCH (Signaling Channel) (None)'])/\
+                                                  (daily_df1800['K3020:TCH Seizure Requests (Signaling Channel) (None)'] + daily_df1800['K3010A:TCH Seizure Requests (Traffic Channel) (None)'])*100
+daily_df1800['TCH Congestion including handover, %_1800']=(daily_df1800['K3011A:Failed TCH Seizures due to Busy TCH (Traffic Channel) (None)']+ \
+                                                   daily_df1800['K3021:Failed TCH Seizures due to Busy TCH (Signaling Channel) (None)'] + \
+                                                  daily_df1800['K3011B:Failed TCH Seizures in TCH Handovers due to Busy TCH (Traffic Channel) (None)'])/\
+                                                  (daily_df1800['K3020:TCH Seizure Requests (Signaling Channel) (None)'] + \
+                                                   daily_df1800['K3010A:TCH Seizure Requests (Traffic Channel) (None)']+ \
+                                                   daily_df1800['K3010B:TCH Seizure Requests in TCH Handovers (Traffic Channel) (None)'])*100
+daily_df1800['SDCCH Drop Rate, %_1800']= daily_df1800['CM30:Call Drops on SDCCH (None)'] / daily_df1800['K3003:Successful SDCCH Seizures (None)'] * 100
+daily_df1800['TCH Assignment Failure Rate, %_1800']= (1 - daily_df1800['K3013A:Successful TCH Seizures (Traffic Channel) (None)'] / daily_df1800['K3010A:TCH Seizure Requests (Traffic Channel) (None)'])*100
+daily_df1800['TCH traffic HalfRate, Erl_1800']= daily_df1800['K3034:TCHH Traffic Volume (Erl)']
+daily_df1800['TCH Drop Rate, %_1800']= daily_df1800['CM33:Call Drops on Traffic Channel (None)']/ \
+                              (daily_df1800['K3013A:Successful TCH Seizures (Traffic Channel) (None)'] + \
+                               daily_df1800['K3013B:Successful TCH Seizures in TCH handovers (Traffic Channel) (None)'] + \
+                               daily_df1800['K3023:Successful TCH Seizures (Signaling Channel) (None)'])*100
+daily_df1800['Handover Success Rate, %_1800']= (daily_df1800['CH333:Successful Outgoing External Inter-Cell Handovers (None)']+\
+                                       daily_df1800['CH313:Number of Successful Outgoing Internal Inter-Cell Handovers (None)'])/\
+                                      (daily_df1800['CH310:Number of Outgoing Internal Inter-Cell Handover Requests (None)']+\
+                                       daily_df1800['CH330:Outgoing External Inter-Cell Handover Requests (None)']) * 100
+daily_df1800['Immediate assignment SR, %_1800']= daily_df1800['K3003:Successful SDCCH Seizures (None)']  / daily_df1800['K3000:SDCCH Seizure Requests (None)'] *100
+daily_df1800['CCSR2G, %_1800']= daily_df1800['Immediate assignment SR, %_1800'] * (100 - daily_df1800['SDCCH Drop Rate, %_1800']) * (100 - daily_df1800['TCH Assignment Failure Rate, %_1800'])\
+                                             * (100 - daily_df1800['TCH Drop Rate, %_1800']) / 1000000
+daily_df1800 = daily_df1800.drop(list_1, axis=1)
+
+daily_df1 = pd.merge(daily_df, daily_df900, how="left")
+daily_dfall = pd.merge(daily_df1, daily_df1800, how="left")
+daily_dfall = daily_dfall.transpose()
+
+# ===обработка hourly===
 hourly_df = sts_df.groupby(['date', 'hour'])[list_1]. sum().reset_index()
 hourly_df['TRX Availability 2G %'] = hourly_df['S3656:Number of available TRXs in a cell (None)'] / hourly_df['S3655:Number of configured TRXs in a cell (None)'] * 100
 hourly_df['TRXs Number'] = hourly_df['S3656:Number of available TRXs in a cell (None)']
@@ -891,7 +959,6 @@ hourly_df['TCH Congestion including handover, %']=(hourly_df['K3011A:Failed TCH 
                                                   (hourly_df['K3020:TCH Seizure Requests (Signaling Channel) (None)'] + \
                                                    hourly_df['K3010A:TCH Seizure Requests (Traffic Channel) (None)']+ \
                                                    hourly_df['K3010B:TCH Seizure Requests in TCH Handovers (Traffic Channel) (None)'])*100
-
 hourly_df['SDCCH Drop Rate, %']= hourly_df['CM30:Call Drops on SDCCH (None)'] / hourly_df['K3003:Successful SDCCH Seizures (None)'] * 100
 hourly_df['TCH Assignment Failure Rate, %']= (1 - hourly_df['K3013A:Successful TCH Seizures (Traffic Channel) (None)'] / hourly_df['K3010A:TCH Seizure Requests (Traffic Channel) (None)'])*100
 hourly_df['TCH traffic HalfRate, Erl']= hourly_df['K3034:TCHH Traffic Volume (Erl)']
@@ -906,14 +973,85 @@ hourly_df['Handover Success Rate, %']= (hourly_df['CH333:Successful Outgoing Ext
 hourly_df['Immediate assignment SR, %']= hourly_df['K3003:Successful SDCCH Seizures (None)']  / hourly_df['K3000:SDCCH Seizure Requests (None)'] *100
 hourly_df['Call completion success rate, %']= hourly_df['Immediate assignment SR, %'] * (100 - hourly_df['SDCCH Drop Rate, %']) * (100 - hourly_df['TCH Assignment Failure Rate, %'])\
                                              * (100 - hourly_df['TCH Drop Rate, %']) / 1000000
-hourly_df = hourly_df.drop(list_1, axis=1) # проверка  чнн
-hourly_df = hourly_df.transpose()
+hourly_df = hourly_df.drop(list_1, axis=1)
 
-# обработка busy hour
+# фильтрация по кластеру 900:
+hourly_df900 = sts_df[sts_df['GCELL'].isin(list_cluster_900)]
+
+hourly_df900 = hourly_df900.groupby(['date', 'hour'])[list_1]. sum().reset_index()
+
+hourly_df900['TRX Availability 2G %_900'] = hourly_df900['S3656:Number of available TRXs in a cell (None)'] / hourly_df900['S3655:Number of configured TRXs in a cell (None)'] * 100
+hourly_df900['TRXs Number_900'] = hourly_df900['S3656:Number of available TRXs in a cell (None)']
+hourly_df900['TCH traffic 2G, Erl_900']= hourly_df900['K3014:Traffic Volume on TCH (Erl)']
+hourly_df900['SDCCH taffic, Erl_900']= hourly_df900['K3004:Traffic Volume on SDCCH (Erl)']
+hourly_df900['SDCCH Congesstion, %_900']= hourly_df900['K3001:Failed SDCCH Seizures due to Busy SDCCH (None)'] / hourly_df900['K3003:Successful SDCCH Seizures (None)'] * 100
+hourly_df900['TCH Congestion excluding handover, %_900']= (hourly_df900['K3011A:Failed TCH Seizures due to Busy TCH (Traffic Channel) (None)']+ \
+                                                   hourly_df900['K3021:Failed TCH Seizures due to Busy TCH (Signaling Channel) (None)'])/\
+                                                  (hourly_df900['K3020:TCH Seizure Requests (Signaling Channel) (None)'] + hourly_df900['K3010A:TCH Seizure Requests (Traffic Channel) (None)'])*100
+hourly_df900['TCH Congestion including handover, %_900']=(hourly_df900['K3011A:Failed TCH Seizures due to Busy TCH (Traffic Channel) (None)']+ \
+                                                   hourly_df900['K3021:Failed TCH Seizures due to Busy TCH (Signaling Channel) (None)'] + \
+                                                  hourly_df900['K3011B:Failed TCH Seizures in TCH Handovers due to Busy TCH (Traffic Channel) (None)'])/\
+                                                  (hourly_df900['K3020:TCH Seizure Requests (Signaling Channel) (None)'] + \
+                                                   hourly_df900['K3010A:TCH Seizure Requests (Traffic Channel) (None)']+ \
+                                                   hourly_df900['K3010B:TCH Seizure Requests in TCH Handovers (Traffic Channel) (None)'])*100
+hourly_df900['SDCCH Drop Rate, %_900']= hourly_df900['CM30:Call Drops on SDCCH (None)'] / hourly_df900['K3003:Successful SDCCH Seizures (None)'] * 100
+hourly_df900['TCH Assignment Failure Rate, %_900']= (1 - hourly_df900['K3013A:Successful TCH Seizures (Traffic Channel) (None)'] / hourly_df900['K3010A:TCH Seizure Requests (Traffic Channel) (None)'])*100
+hourly_df900['TCH traffic HalfRate, Erl_900']= hourly_df900['K3034:TCHH Traffic Volume (Erl)']
+hourly_df900['TCH Drop Rate, %_900']= hourly_df900['CM33:Call Drops on Traffic Channel (None)']/ \
+                              (hourly_df900['K3013A:Successful TCH Seizures (Traffic Channel) (None)'] + \
+                               hourly_df900['K3013B:Successful TCH Seizures in TCH handovers (Traffic Channel) (None)'] + \
+                               hourly_df900['K3023:Successful TCH Seizures (Signaling Channel) (None)'])*100
+hourly_df900['Handover Success Rate, %_900']= (hourly_df900['CH333:Successful Outgoing External Inter-Cell Handovers (None)']+\
+                                       hourly_df900['CH313:Number of Successful Outgoing Internal Inter-Cell Handovers (None)'])/\
+                                      (hourly_df900['CH310:Number of Outgoing Internal Inter-Cell Handover Requests (None)']+\
+                                       hourly_df900['CH330:Outgoing External Inter-Cell Handover Requests (None)']) * 100
+hourly_df900['Immediate assignment SR, %_900']= hourly_df900['K3003:Successful SDCCH Seizures (None)']  / hourly_df900['K3000:SDCCH Seizure Requests (None)'] *100
+hourly_df900['Call completion success rate, %_900']= hourly_df900['Immediate assignment SR, %_900'] * (100 - hourly_df900['SDCCH Drop Rate, %_900']) * (100 - hourly_df900['TCH Assignment Failure Rate, %_900'])\
+                                             * (100 - hourly_df900['TCH Drop Rate, %_900']) / 1000000
+hourly_df900 = hourly_df900.drop(list_1, axis=1)
+
+
+# фильтрация по кластеру 1800:
+hourly_df1800 = sts_df[sts_df['GCELL'].isin(list_cluster_1800)]
+hourly_df1800 = hourly_df1800.groupby(['date', 'hour'])[list_1]. sum().reset_index()
+hourly_df1800['TRX Availability 2G %_1800'] = hourly_df1800['S3656:Number of available TRXs in a cell (None)'] / hourly_df1800['S3655:Number of configured TRXs in a cell (None)'] * 100
+hourly_df1800['TRXs Number_1800'] = hourly_df1800['S3656:Number of available TRXs in a cell (None)']
+hourly_df1800['TCH traffic 2G, Erl_1800']= hourly_df1800['K3014:Traffic Volume on TCH (Erl)']
+hourly_df1800['SDCCH taffic, Erl_1800']= hourly_df1800['K3004:Traffic Volume on SDCCH (Erl)']
+hourly_df1800['SDCCH Congesstion, %_1800']= hourly_df1800['K3001:Failed SDCCH Seizures due to Busy SDCCH (None)'] / hourly_df1800['K3003:Successful SDCCH Seizures (None)'] * 100
+hourly_df1800['TCH Congestion excluding handover, %_1800']= (hourly_df1800['K3011A:Failed TCH Seizures due to Busy TCH (Traffic Channel) (None)']+ \
+                                                   hourly_df1800['K3021:Failed TCH Seizures due to Busy TCH (Signaling Channel) (None)'])/\
+                                                  (hourly_df1800['K3020:TCH Seizure Requests (Signaling Channel) (None)'] + hourly_df1800['K3010A:TCH Seizure Requests (Traffic Channel) (None)'])*100
+hourly_df1800['TCH Congestion including handover, %_1800']=(hourly_df1800['K3011A:Failed TCH Seizures due to Busy TCH (Traffic Channel) (None)']+ \
+                                                   hourly_df1800['K3021:Failed TCH Seizures due to Busy TCH (Signaling Channel) (None)'] + \
+                                                  hourly_df1800['K3011B:Failed TCH Seizures in TCH Handovers due to Busy TCH (Traffic Channel) (None)'])/\
+                                                  (hourly_df1800['K3020:TCH Seizure Requests (Signaling Channel) (None)'] + \
+                                                   hourly_df1800['K3010A:TCH Seizure Requests (Traffic Channel) (None)']+ \
+                                                   hourly_df1800['K3010B:TCH Seizure Requests in TCH Handovers (Traffic Channel) (None)'])*100
+hourly_df1800['SDCCH Drop Rate, %_1800']= hourly_df1800['CM30:Call Drops on SDCCH (None)'] / hourly_df1800['K3003:Successful SDCCH Seizures (None)'] * 100
+hourly_df1800['TCH Assignment Failure Rate, %_1800']= (1 - hourly_df1800['K3013A:Successful TCH Seizures (Traffic Channel) (None)'] / hourly_df1800['K3010A:TCH Seizure Requests (Traffic Channel) (None)'])*100
+hourly_df1800['TCH traffic HalfRate, Erl_1800']= hourly_df1800['K3034:TCHH Traffic Volume (Erl)']
+hourly_df1800['TCH Drop Rate, %_1800']= hourly_df1800['CM33:Call Drops on Traffic Channel (None)']/ \
+                              (hourly_df1800['K3013A:Successful TCH Seizures (Traffic Channel) (None)'] + \
+                               hourly_df1800['K3013B:Successful TCH Seizures in TCH handovers (Traffic Channel) (None)'] + \
+                               hourly_df1800['K3023:Successful TCH Seizures (Signaling Channel) (None)'])*100
+hourly_df1800['Handover Success Rate, %_1800']= (hourly_df1800['CH333:Successful Outgoing External Inter-Cell Handovers (None)']+\
+                                       hourly_df1800['CH313:Number of Successful Outgoing Internal Inter-Cell Handovers (None)'])/\
+                                      (hourly_df1800['CH310:Number of Outgoing Internal Inter-Cell Handover Requests (None)']+\
+                                       hourly_df1800['CH330:Outgoing External Inter-Cell Handover Requests (None)']) * 100
+hourly_df1800['Immediate assignment SR, %_1800']= hourly_df1800['K3003:Successful SDCCH Seizures (None)']  / hourly_df1800['K3000:SDCCH Seizure Requests (None)'] *100
+hourly_df1800['Call completion success rate, %_1800']= hourly_df1800['Immediate assignment SR, %_1800'] * (100 - hourly_df1800['SDCCH Drop Rate, %_1800']) * (100 - hourly_df1800['TCH Assignment Failure Rate, %_1800'])\
+                                             * (100 - hourly_df1800['TCH Drop Rate, %_1800']) / 1000000
+hourly_df1800 = hourly_df1800.drop(list_1, axis=1)
+
+hourly_dfall1 = pd.merge(hourly_df, hourly_df900, how="left")
+hourly_dfall = pd.merge(hourly_dfall1, hourly_df1800, how="left")
+hourly_dfall = hourly_dfall.transpose()
+
+# ===обработка busy hour===
 hourlyBH_df = sts_df.groupby(['date', 'hour'])[list_1]. sum().reset_index()
 max_index = hourlyBH_df.groupby('date')['K3014:Traffic Volume on TCH (Erl)'].idxmax()
 hourlyBH_df = hourlyBH_df.loc[max_index]
-
 hourlyBH_df['TRX Availability 2G %'] = hourlyBH_df['S3656:Number of available TRXs in a cell (None)'] / hourlyBH_df['S3655:Number of configured TRXs in a cell (None)'] * 100
 hourlyBH_df['TRXs Number'] = hourlyBH_df['S3656:Number of available TRXs in a cell (None)']
 hourlyBH_df['TCH traffic 2G, Erl']= hourlyBH_df['K3014:Traffic Volume on TCH (Erl)']
@@ -946,16 +1084,11 @@ hourlyBH_df['CCCSR2G, %']= hourlyBH_df['Immediate assignment SR, %'] * (100 - ho
 hourlyBH_df = hourlyBH_df.drop(list_1, axis=1) # проверка  чнн
 hourlyBH_df = hourlyBH_df.transpose()
 
-#daily_df.plot(x = daily_df['date'], y = daily_df['Immediate assignment SR, %'])
-#plt.show()
-#hourlyBH_df['Immediate assignment SR, %'].plot(kind = 'hist')
-
 #daily_df.to_excel("C:/test/sts/9-15.xls", engine='openpyxl', sheet_name='Book1')
-#hourlyBH_df.to_excel("C:/test/sts/9-15h.xls", engine='openpyxl', sheet_name='Book2')
-with pd.ExcelWriter(f"{directory}{csv_name}{output_comment}.xls", engine='openpyxl') as writer:
+with pd.ExcelWriter(f"{directory}{csv_name}{output_comment}.xlsx", engine='openpyxl') as writer:
     weekly_df.to_excel(writer, sheet_name='weekly')
-    daily_df.to_excel(writer, sheet_name='daily')
-    hourly_df.to_excel(writer, sheet_name='hourly')
+    daily_dfall.to_excel(writer, sheet_name='daily')
+    hourly_dfall.to_excel(writer, sheet_name='hourly')
     hourlyBH_df.to_excel(writer, sheet_name='busy_hour')
 
 frequency = 2500  # Set Frequency To 2500 Hertz
