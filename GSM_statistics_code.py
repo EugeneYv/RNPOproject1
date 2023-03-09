@@ -1,10 +1,14 @@
 import pandas as pd
 import winsound
+import openpyxl
+from openpyxl.chart import (LineChart, Reference)
+import openpyxl.styles
 '''вывод посуточной статистики для GSM. импортный файл - в МАЕ вывести в формате xlsx, потом в экселе переделать в csv'''
 
-directory = 'C:/work/sts/2G/'
-csv_name = '2G_countersCS(2023-02-27'
-output_comment = '_output'  # что добавится в конце к названию файла
+
+directory = 'C:/work/Herson_audit/sts/2G/'
+csv_name = '2G_countersCS(2023-03-09'
+output_comment = '_outputn'  # что добавится в конце к названию файла
 
 #sts_df = pd.read_excel(f"{directory}{csv_name}.xlsx", header=7)
 sts_df = pd.read_csv(f"{directory}{csv_name}.csv", sep=";", header=7)
@@ -836,7 +840,8 @@ weekly_df['Immediate assignment SR, %']= weekly_df['K3003:Successful SDCCH Seizu
 weekly_df['CCSR2G, %']= weekly_df['Immediate assignment SR, %'] * (100 - weekly_df['SDCCH Drop Rate, %']) * (100 - weekly_df['TCH Assignment Failure Rate, %'])\
                                              * (100 - weekly_df['TCH Drop Rate, %']) / 1000000
 weekly_df = weekly_df.drop(list_1, axis=1)
-weekly_df = weekly_df.transpose()
+weekly_df_trans = weekly_df.transpose()
+
 
 # ===обработка daily===
 daily_df = sts_df.groupby(['date'])[list_1]. sum().reset_index()
@@ -941,7 +946,7 @@ daily_df1800 = daily_df1800.drop(list_1, axis=1)
 
 daily_df1 = pd.merge(daily_df, daily_df900, how="left")
 daily_dfall = pd.merge(daily_df1, daily_df1800, how="left")
-daily_dfall = daily_dfall.transpose()
+daily_dfall_trans = daily_dfall.transpose()
 
 # ===обработка hourly===
 hourly_df = sts_df.groupby(['date', 'hour'])[list_1]. sum().reset_index()
@@ -1046,7 +1051,7 @@ hourly_df1800 = hourly_df1800.drop(list_1, axis=1)
 
 hourly_dfall1 = pd.merge(hourly_df, hourly_df900, how="left")
 hourly_dfall = pd.merge(hourly_dfall1, hourly_df1800, how="left")
-hourly_dfall = hourly_dfall.transpose()
+hourly_dfall_trans = hourly_dfall.transpose()
 
 # ===обработка busy hour===
 hourlyBH_df = sts_df.groupby(['date', 'hour'])[list_1]. sum().reset_index()
@@ -1082,7 +1087,7 @@ hourlyBH_df['Immediate assignment SR, %']= hourlyBH_df['K3003:Successful SDCCH S
 hourlyBH_df['CCCSR2G, %']= hourlyBH_df['Immediate assignment SR, %'] * (100 - hourlyBH_df['SDCCH Drop Rate, %']) * (100 - hourlyBH_df['TCH Assignment Failure Rate, %'])\
                                              * (100 - hourlyBH_df['TCH Drop Rate, %']) / 1000000
 hourlyBH_df = hourlyBH_df.drop(list_1, axis=1) # проверка  чнн
-hourlyBH_df = hourlyBH_df.transpose()
+hourlyBH_df_trans = hourlyBH_df.transpose()
 
 #daily_df.to_excel("C:/test/sts/9-15.xls", engine='openpyxl', sheet_name='Book1')
 with pd.ExcelWriter(f"{directory}{csv_name}{output_comment}.xlsx", engine='openpyxl') as writer:
@@ -1090,6 +1095,590 @@ with pd.ExcelWriter(f"{directory}{csv_name}{output_comment}.xlsx", engine='openp
     daily_dfall.to_excel(writer, sheet_name='daily')
     hourly_dfall.to_excel(writer, sheet_name='hourly')
     hourlyBH_df.to_excel(writer, sheet_name='busy_hour')
+    weekly_df_trans.to_excel(writer, sheet_name='weekly_trans')
+    daily_dfall_trans.to_excel(writer, sheet_name='daily_trans')
+    hourly_dfall_trans.to_excel(writer, sheet_name='hourly_trans')
+    hourlyBH_df_trans.to_excel(writer, sheet_name='busy_hour_trans')
+
+''' переходим к работе с эксель файлом - форматирование строк и добавление графиков
+    используем модуль openpyxl'''
+
+# модуль openpyxl работает с эксель файлом
+my_file = openpyxl.load_workbook(f"{directory}{csv_name}{output_comment}.xlsx")
+weekly_sheet = my_file["weekly"]
+daily_sheet = my_file["daily"]
+hourly_sheet = my_file["hourly"]
+busyhour_sheet = my_file["busy_hour"]
+
+weekly_sheet_trans = my_file["weekly_trans"]
+daily_sheet_trans = my_file["daily_trans"]
+hourly_sheet_trans = my_file["hourly_trans"]
+busyhour_sheet_trans = my_file["busy_hour_trans"]
+
+weekly_sheet.column_dimensions["A"].width = 2
+daily_sheet.column_dimensions["B"].width = 11
+hourly_sheet.column_dimensions["A"].width = 2
+busyhour_sheet.column_dimensions["A"].width = 11
+
+weekly_sheet_trans.column_dimensions["A"].width = 35
+daily_sheet_trans.column_dimensions["A"].width = 35
+hourly_sheet_trans.column_dimensions["A"].width = 35
+busyhour_sheet_trans.column_dimensions["A"].width = 35
+
+hourly_sheet.delete_cols(1) # удаляем первые столбцы чтобы номера столбцов для всех KPI были одинаковыми как в дневной статистике
+busyhour_sheet.delete_cols(1) # удаляем первые столбцы чтобы номера столбцов для всех KPI были одинаковыми как в дневной статистике
+
+# определение количества строк в таблицах
+last_row_weekly = weekly_sheet.max_row
+last_row_daily = daily_sheet.max_row
+last_row_hourly = hourly_sheet.max_row
+last_row_BH = busyhour_sheet.max_row
+# выставление правильного формата для столбцов с датами
+for r in range(2,(last_row_daily+1)):
+    daily_sheet[f'B{r}'].number_format ='DD.MM.YYYY'
+for r in range(2, (last_row_hourly+1)):
+    hourly_sheet[f'A{r}'].number_format ='DD'
+for r in range(2,(last_row_BH+1)):
+    busyhour_sheet[f'A{r}'].number_format ='DD.MM.YYYY'
+
+for cell in daily_sheet_trans[2]:
+    cell.number_format ='DD.MM.YYYY'
+# выставление переноса строк для названий KPI
+for cell in weekly_sheet[1]:
+    cell.alignment = openpyxl.styles.Alignment(wrap_text=True)
+for cell in daily_sheet[1]:
+    cell.alignment = openpyxl.styles.Alignment(wrap_text=True)
+for cell in hourly_sheet[1]:
+    cell.alignment = openpyxl.styles.Alignment(wrap_text=True)
+for cell in busyhour_sheet[1]:
+    cell.alignment = openpyxl.styles.Alignment(wrap_text=True)
+
+#  графики в недельной таблице weekly_sheet
+x_values = Reference(weekly_sheet, range_string=(f"weekly!$B$2:$B${last_row_weekly}"))
+
+traffic_TCH = Reference(weekly_sheet, min_col=5, min_row=1, max_col=5, max_row=last_row_weekly)
+traffic_SD = Reference(weekly_sheet, min_col=6, min_row=1, max_col=6, max_row=last_row_weekly)
+traffic_chart = LineChart()
+traffic_chart.width = 40
+traffic_chart.height = 10
+traffic_chart.add_data(traffic_TCH, titles_from_data = True)  #
+traffic_chart.add_data(traffic_SD, titles_from_data = True)  #
+traffic_chart.set_categories(x_values)
+traffic_chart.legend.position = 'b'
+weekly_sheet.add_chart(traffic_chart, "A8")
+
+cong = Reference(weekly_sheet, min_col=7, min_row=1, max_col=9, max_row=last_row_weekly)
+cong_chart = LineChart()
+cong_chart.width = 40
+cong_chart.height = 10
+cong_chart.add_data(cong, titles_from_data = True)  #
+cong_chart.set_categories(x_values)
+cong_chart.legend.position = 'b'
+weekly_sheet.add_chart(cong_chart, "A28")
+
+dropSD = Reference(weekly_sheet, min_col=10, min_row=1, max_col=10, max_row=last_row_weekly)
+dropTCH = Reference(weekly_sheet, min_col=13, min_row=1, max_col=13, max_row=last_row_weekly)
+drop_chart = LineChart()
+drop_chart.width = 40
+drop_chart.height = 10
+drop_chart.add_data(dropSD, titles_from_data = True)
+drop_chart.add_data(dropTCH, titles_from_data = True)
+drop_chart.set_categories(x_values)
+drop_chart.legend.position = 'b'
+weekly_sheet.add_chart(drop_chart, "A48")
+
+handover = Reference(weekly_sheet, min_col=14, min_row=1, max_col=14, max_row=last_row_weekly)
+immediate = Reference(weekly_sheet, min_col=15, min_row=1, max_col=15, max_row=last_row_weekly)
+CCSR2G = Reference(weekly_sheet, min_col=16, min_row=1, max_col=16, max_row=last_row_weekly)
+HOIMMCCSR_chart = LineChart()
+HOIMMCCSR_chart.width = 40
+HOIMMCCSR_chart.height = 10
+HOIMMCCSR_chart.add_data(handover, titles_from_data = True)
+HOIMMCCSR_chart.add_data(immediate, titles_from_data = True)
+HOIMMCCSR_chart.add_data(CCSR2G, titles_from_data = True)
+HOIMMCCSR_chart.set_categories(x_values)
+HOIMMCCSR_chart.legend.position = 'b'
+weekly_sheet.add_chart(HOIMMCCSR_chart, "A68")
+
+#  графики в суточной таблице daily_sheet   last_row_daily
+x_values = Reference(daily_sheet, range_string=(f"daily!$B$2:$B${last_row_daily}"))
+
+TRXAvailability2G= Reference(daily_sheet, min_col=3, min_row=1, max_row=last_row_daily)
+TRXsNumber= Reference(daily_sheet, min_col=4, min_row=1, max_row=last_row_daily)
+TCHtraffic2GErl= Reference(daily_sheet, min_col=5, min_row=1, max_row=last_row_daily)
+SDCCHtafficErl= Reference(daily_sheet, min_col=6, min_row=1, max_row=last_row_daily)
+SDCCHCongesstion= Reference(daily_sheet, min_col=7, min_row=1, max_row=last_row_daily)
+TCHCongestionexcludinghandover= Reference(daily_sheet, min_col=8, min_row=1, max_row=last_row_daily)
+TCHCongestionincludinghandover= Reference(daily_sheet, min_col=9, min_row=1, max_row=last_row_daily)
+SDCCHDropRate= Reference(daily_sheet, min_col=10, min_row=1, max_row=last_row_daily)
+TCHAssignmentFailureRate= Reference(daily_sheet, min_col=11, min_row=1, max_row=last_row_daily)
+TCHtrafficHalfRateErl= Reference(daily_sheet, min_col=12, min_row=1, max_row=last_row_daily)
+TCHDropRate= Reference(daily_sheet, min_col=13, min_row=1, max_row=last_row_daily)
+HandoverSuccessRate= Reference(daily_sheet, min_col=14, min_row=1, max_row=last_row_daily)
+ImmediateassignmentSR= Reference(daily_sheet, min_col=15, min_row=1, max_row=last_row_daily)
+CCSR2G= Reference(daily_sheet, min_col=16, min_row=1, max_row=last_row_daily)
+TRXAvailability2G900= Reference(daily_sheet, min_col=17, min_row=1, max_row=last_row_daily)
+TRXsNumber900= Reference(daily_sheet, min_col=18, min_row=1, max_row=last_row_daily)
+TCHtraffic2GErl900= Reference(daily_sheet, min_col=19, min_row=1, max_row=last_row_daily)
+SDCCHtafficErl900= Reference(daily_sheet, min_col=20, min_row=1, max_row=last_row_daily)
+SDCCHCongesstion900= Reference(daily_sheet, min_col=21, min_row=1, max_row=last_row_daily)
+TCHCongestionexcludinghandover900= Reference(daily_sheet, min_col=22, min_row=1, max_row=last_row_daily)
+TCHCongestionincludinghandover900= Reference(daily_sheet, min_col=23, min_row=1, max_row=last_row_daily)
+SDCCHDropRate900= Reference(daily_sheet, min_col=24, min_row=1, max_row=last_row_daily)
+TCHAssignmentFailureRate900= Reference(daily_sheet, min_col=25, min_row=1, max_row=last_row_daily)
+TCHtrafficHalfRateErl900= Reference(daily_sheet, min_col=26, min_row=1, max_row=last_row_daily)
+TCHDropRate900= Reference(daily_sheet, min_col=27, min_row=1, max_row=last_row_daily)
+HandoverSuccessRate900= Reference(daily_sheet, min_col=28, min_row=1, max_row=last_row_daily)
+ImmediateassignmentSR900= Reference(daily_sheet, min_col=29, min_row=1, max_row=last_row_daily)
+CCSR2G900= Reference(daily_sheet, min_col=30, min_row=1, max_row=last_row_daily)
+TRXAvailability2G1800= Reference(daily_sheet, min_col=31, min_row=1, max_row=last_row_daily)
+TRXsNumber1800= Reference(daily_sheet, min_col=32, min_row=1, max_row=last_row_daily)
+TCHtraffic2GErl1800= Reference(daily_sheet, min_col=33, min_row=1, max_row=last_row_daily)
+SDCCHtafficErl1800= Reference(daily_sheet, min_col=34, min_row=1, max_row=last_row_daily)
+SDCCHCongesstion1800= Reference(daily_sheet, min_col=35, min_row=1, max_row=last_row_daily)
+TCHCongestionexcludinghandover1800= Reference(daily_sheet, min_col=36, min_row=1, max_row=last_row_daily)
+TCHCongestionincludinghandover1800= Reference(daily_sheet, min_col=37, min_row=1, max_row=last_row_daily)
+SDCCHDropRate1800= Reference(daily_sheet, min_col=38, min_row=1, max_row=last_row_daily)
+TCHAssignmentFailureRate1800= Reference(daily_sheet, min_col=39, min_row=1, max_row=last_row_daily)
+TCHtrafficHalfRateErl1800= Reference(daily_sheet, min_col=40, min_row=1, max_row=last_row_daily)
+TCHDropRate1800= Reference(daily_sheet, min_col=41, min_row=1, max_row=last_row_daily)
+HandoverSuccessRate1800= Reference(daily_sheet, min_col=42, min_row=1, max_row=last_row_daily)
+ImmediateassignmentSR1800= Reference(daily_sheet, min_col=43, min_row=1, max_row=last_row_daily)
+CCSR2G1800= Reference(daily_sheet, min_col=44, min_row=1, max_row=last_row_daily)
+
+traffic_chart = LineChart()
+traffic_chart.width = 40
+traffic_chart.height = 10
+traffic_chart.add_data(TCHtraffic2GErl, titles_from_data = True)  #
+traffic_chart.add_data(TCHtraffic2GErl900, titles_from_data = True)
+traffic_chart.add_data(TCHtraffic2GErl1800, titles_from_data = True)
+traffic_chart.set_categories(x_values)
+traffic_chart.legend.position = 'b'
+daily_sheet.add_chart(traffic_chart, "A18")
+
+SDtraffic_chart = LineChart()
+SDtraffic_chart.width = 40
+SDtraffic_chart.height = 10
+SDtraffic_chart.add_data(SDCCHtafficErl, titles_from_data = True)  #
+SDtraffic_chart.add_data(SDCCHtafficErl900, titles_from_data = True)
+SDtraffic_chart.add_data(SDCCHtafficErl1800, titles_from_data = True)
+SDtraffic_chart.set_categories(x_values)
+SDtraffic_chart.legend.position = 'b'
+daily_sheet.add_chart(SDtraffic_chart, "A38")
+
+SDcong_chart = LineChart()
+SDcong_chart.width = 40
+SDcong_chart.height = 10
+SDcong_chart.add_data(SDCCHCongesstion, titles_from_data = True)  #
+SDcong_chart.add_data(SDCCHCongesstion900, titles_from_data = True)
+SDcong_chart.add_data(SDCCHCongesstion1800, titles_from_data = True)
+SDcong_chart.set_categories(x_values)
+SDcong_chart.legend.position = 'b'
+daily_sheet.add_chart(SDcong_chart, "A58")
+
+TCHcong_chart = LineChart()
+TCHcong_chart.width = 40
+TCHcong_chart.height = 10
+TCHcong_chart.add_data(TCHCongestionexcludinghandover, titles_from_data = True)  #
+TCHcong_chart.add_data(TCHCongestionexcludinghandover900, titles_from_data = True)
+TCHcong_chart.add_data(TCHCongestionexcludinghandover1800, titles_from_data = True)
+TCHcong_chart.add_data(TCHCongestionincludinghandover, titles_from_data = True)  #
+TCHcong_chart.add_data(TCHCongestionincludinghandover900, titles_from_data = True)
+TCHcong_chart.add_data(TCHCongestionincludinghandover1800, titles_from_data = True)
+TCHcong_chart.set_categories(x_values)
+TCHcong_chart.legend.position = 'b'
+daily_sheet.add_chart(TCHcong_chart, "A78")
+
+TCHdrop_chart = LineChart()
+TCHdrop_chart.width = 40
+TCHdrop_chart.height = 10
+TCHdrop_chart.add_data(TCHDropRate, titles_from_data = True)
+TCHdrop_chart.add_data(TCHDropRate900, titles_from_data = True)
+TCHdrop_chart.add_data(TCHDropRate1800, titles_from_data = True)
+TCHdrop_chart.set_categories(x_values)
+TCHdrop_chart.legend.position = 'b'
+daily_sheet.add_chart(TCHdrop_chart, "A98")
+
+SDdrop_chart = LineChart()
+SDdrop_chart.width = 40
+SDdrop_chart.height = 10
+SDdrop_chart.add_data(SDCCHDropRate, titles_from_data = True)
+SDdrop_chart.add_data(SDCCHDropRate900, titles_from_data = True)
+SDdrop_chart.add_data(SDCCHDropRate1800, titles_from_data = True)
+SDdrop_chart.set_categories(x_values)
+SDdrop_chart.legend.position = 'b'
+daily_sheet.add_chart(SDdrop_chart, "A118")
+
+HOSR_chart = LineChart()
+HOSR_chart.width = 40
+HOSR_chart.height = 10
+HOSR_chart.add_data(HandoverSuccessRate, titles_from_data = True)
+HOSR_chart.add_data(HandoverSuccessRate900, titles_from_data = True)
+HOSR_chart.add_data(HandoverSuccessRate1800, titles_from_data = True)
+HOSR_chart.set_categories(x_values)
+HOSR_chart.legend.position = 'b'
+daily_sheet.add_chart(HOSR_chart, "A138")
+
+Assignment_chart = LineChart()
+Assignment_chart.width = 40
+Assignment_chart.height = 10
+Assignment_chart.add_data(TCHAssignmentFailureRate, titles_from_data = True)
+Assignment_chart.add_data(TCHAssignmentFailureRate900, titles_from_data = True)
+Assignment_chart.add_data(TCHAssignmentFailureRate1800, titles_from_data = True)
+Assignment_chart.set_categories(x_values)
+Assignment_chart.legend.position = 'b'
+daily_sheet.add_chart(Assignment_chart, "A158")
+
+ImmAssignment_chart = LineChart()
+ImmAssignment_chart.width = 40
+ImmAssignment_chart.height = 10
+ImmAssignment_chart.add_data(ImmediateassignmentSR, titles_from_data = True)
+ImmAssignment_chart.add_data(ImmediateassignmentSR900, titles_from_data = True)
+ImmAssignment_chart.add_data(ImmediateassignmentSR1800, titles_from_data = True)
+ImmAssignment_chart.set_categories(x_values)
+ImmAssignment_chart.legend.position = 'b'
+daily_sheet.add_chart(ImmAssignment_chart, "A178")
+
+CSSR_chart = LineChart()
+CSSR_chart.width = 40
+CSSR_chart.height = 10
+CSSR_chart.add_data(CCSR2G, titles_from_data = True)
+CSSR_chart.add_data(CCSR2G900, titles_from_data = True)
+CSSR_chart.add_data(CCSR2G1800, titles_from_data = True)
+CSSR_chart.set_categories(x_values)
+CSSR_chart.legend.position = 'b'
+daily_sheet.add_chart(CSSR_chart, "A198")
+
+TRXavailability_chart = LineChart()
+TRXavailability_chart.width = 40
+TRXavailability_chart.height = 10
+TRXavailability_chart.add_data(TRXAvailability2G, titles_from_data = True)
+TRXavailability_chart.add_data(TRXAvailability2G900, titles_from_data = True)
+TRXavailability_chart.add_data(TRXAvailability2G1800, titles_from_data = True)
+TRXavailability_chart.set_categories(x_values)
+TRXavailability_chart.legend.position = 'b'
+daily_sheet.add_chart(TRXavailability_chart, "A218")
+
+#  графики в часовой таблице hourly_sheet   last_row_hourly
+x_values = Reference(hourly_sheet, range_string=(f"hourly!$A$2:$B${last_row_hourly}"))
+
+TRXAvailability2G= Reference(hourly_sheet, min_col=3, min_row=1, max_row=last_row_hourly)
+TRXsNumber= Reference(hourly_sheet, min_col=4, min_row=1, max_row=last_row_hourly)
+TCHtraffic2GErl= Reference(hourly_sheet, min_col=5, min_row=1, max_row=last_row_hourly)
+SDCCHtafficErl= Reference(hourly_sheet, min_col=6, min_row=1, max_row=last_row_hourly)
+SDCCHCongesstion= Reference(hourly_sheet, min_col=7, min_row=1, max_row=last_row_hourly)
+TCHCongestionexcludinghandover= Reference(hourly_sheet, min_col=8, min_row=1, max_row=last_row_hourly)
+TCHCongestionincludinghandover= Reference(hourly_sheet, min_col=9, min_row=1, max_row=last_row_hourly)
+SDCCHDropRate= Reference(hourly_sheet, min_col=10, min_row=1, max_row=last_row_hourly)
+TCHAssignmentFailureRate= Reference(hourly_sheet, min_col=11, min_row=1, max_row=last_row_hourly)
+TCHtrafficHalfRateErl= Reference(hourly_sheet, min_col=12, min_row=1, max_row=last_row_hourly)
+TCHDropRate= Reference(hourly_sheet, min_col=13, min_row=1, max_row=last_row_hourly)
+HandoverSuccessRate= Reference(hourly_sheet, min_col=14, min_row=1, max_row=last_row_hourly)
+ImmediateassignmentSR= Reference(hourly_sheet, min_col=15, min_row=1, max_row=last_row_hourly)
+CCSR2G= Reference(hourly_sheet, min_col=16, min_row=1, max_row=last_row_hourly)
+TRXAvailability2G900= Reference(hourly_sheet, min_col=17, min_row=1, max_row=last_row_hourly)
+TRXsNumber900= Reference(hourly_sheet, min_col=18, min_row=1, max_row=last_row_hourly)
+TCHtraffic2GErl900= Reference(hourly_sheet, min_col=19, min_row=1, max_row=last_row_hourly)
+SDCCHtafficErl900= Reference(hourly_sheet, min_col=20, min_row=1, max_row=last_row_hourly)
+SDCCHCongesstion900= Reference(hourly_sheet, min_col=21, min_row=1, max_row=last_row_hourly)
+TCHCongestionexcludinghandover900= Reference(hourly_sheet, min_col=22, min_row=1, max_row=last_row_hourly)
+TCHCongestionincludinghandover900= Reference(hourly_sheet, min_col=23, min_row=1, max_row=last_row_hourly)
+SDCCHDropRate900= Reference(hourly_sheet, min_col=24, min_row=1, max_row=last_row_hourly)
+TCHAssignmentFailureRate900= Reference(hourly_sheet, min_col=25, min_row=1, max_row=last_row_hourly)
+TCHtrafficHalfRateErl900= Reference(hourly_sheet, min_col=26, min_row=1, max_row=last_row_hourly)
+TCHDropRate900= Reference(hourly_sheet, min_col=27, min_row=1, max_row=last_row_hourly)
+HandoverSuccessRate900= Reference(hourly_sheet, min_col=28, min_row=1, max_row=last_row_hourly)
+ImmediateassignmentSR900= Reference(hourly_sheet, min_col=29, min_row=1, max_row=last_row_hourly)
+CCSR2G900= Reference(hourly_sheet, min_col=30, min_row=1, max_row=last_row_hourly)
+TRXAvailability2G1800= Reference(hourly_sheet, min_col=31, min_row=1, max_row=last_row_hourly)
+TRXsNumber1800= Reference(hourly_sheet, min_col=32, min_row=1, max_row=last_row_hourly)
+TCHtraffic2GErl1800= Reference(hourly_sheet, min_col=33, min_row=1, max_row=last_row_hourly)
+SDCCHtafficErl1800= Reference(hourly_sheet, min_col=34, min_row=1, max_row=last_row_hourly)
+SDCCHCongesstion1800= Reference(hourly_sheet, min_col=35, min_row=1, max_row=last_row_hourly)
+TCHCongestionexcludinghandover1800= Reference(hourly_sheet, min_col=36, min_row=1, max_row=last_row_hourly)
+TCHCongestionincludinghandover1800= Reference(hourly_sheet, min_col=37, min_row=1, max_row=last_row_hourly)
+SDCCHDropRate1800= Reference(hourly_sheet, min_col=38, min_row=1, max_row=last_row_hourly)
+TCHAssignmentFailureRate1800= Reference(hourly_sheet, min_col=39, min_row=1, max_row=last_row_hourly)
+TCHtrafficHalfRateErl1800= Reference(hourly_sheet, min_col=40, min_row=1, max_row=last_row_hourly)
+TCHDropRate1800= Reference(hourly_sheet, min_col=41, min_row=1, max_row=last_row_hourly)
+HandoverSuccessRate1800= Reference(hourly_sheet, min_col=42, min_row=1, max_row=last_row_hourly)
+ImmediateassignmentSR1800= Reference(hourly_sheet, min_col=43, min_row=1, max_row=last_row_hourly)
+CCSR2G1800= Reference(hourly_sheet, min_col=44, min_row=1, max_row=last_row_hourly)
+
+traffic_chart = LineChart()
+traffic_chart.width = 40
+traffic_chart.height = 10
+traffic_chart.add_data(TCHtraffic2GErl, titles_from_data = True)  #
+traffic_chart.add_data(TCHtraffic2GErl900, titles_from_data = True)
+traffic_chart.add_data(TCHtraffic2GErl1800, titles_from_data = True)
+traffic_chart.set_categories(x_values)
+traffic_chart.legend.position = 'b'
+hourly_sheet.add_chart(traffic_chart, "A18")
+
+SDtraffic_chart = LineChart()
+SDtraffic_chart.width = 40
+SDtraffic_chart.height = 10
+SDtraffic_chart.add_data(SDCCHtafficErl, titles_from_data = True)  #
+SDtraffic_chart.add_data(SDCCHtafficErl900, titles_from_data = True)
+SDtraffic_chart.add_data(SDCCHtafficErl1800, titles_from_data = True)
+SDtraffic_chart.set_categories(x_values)
+SDtraffic_chart.legend.position = 'b'
+hourly_sheet.add_chart(SDtraffic_chart, "A38")
+
+SDcong_chart = LineChart()
+SDcong_chart.width = 40
+SDcong_chart.height = 10
+SDcong_chart.add_data(SDCCHCongesstion, titles_from_data = True)  #
+SDcong_chart.add_data(SDCCHCongesstion900, titles_from_data = True)
+SDcong_chart.add_data(SDCCHCongesstion1800, titles_from_data = True)
+SDcong_chart.set_categories(x_values)
+SDcong_chart.legend.position = 'b'
+hourly_sheet.add_chart(SDcong_chart, "A58")
+
+TCHcong_chart = LineChart()
+TCHcong_chart.width = 40
+TCHcong_chart.height = 10
+TCHcong_chart.add_data(TCHCongestionexcludinghandover, titles_from_data = True)  #
+TCHcong_chart.add_data(TCHCongestionexcludinghandover900, titles_from_data = True)
+TCHcong_chart.add_data(TCHCongestionexcludinghandover1800, titles_from_data = True)
+TCHcong_chart.add_data(TCHCongestionincludinghandover, titles_from_data = True)  #
+TCHcong_chart.add_data(TCHCongestionincludinghandover900, titles_from_data = True)
+TCHcong_chart.add_data(TCHCongestionincludinghandover1800, titles_from_data = True)
+TCHcong_chart.set_categories(x_values)
+TCHcong_chart.legend.position = 'b'
+hourly_sheet.add_chart(TCHcong_chart, "A78")
+
+TCHdrop_chart = LineChart()
+TCHdrop_chart.width = 40
+TCHdrop_chart.height = 10
+TCHdrop_chart.add_data(TCHDropRate, titles_from_data = True)
+TCHdrop_chart.add_data(TCHDropRate900, titles_from_data = True)
+TCHdrop_chart.add_data(TCHDropRate1800, titles_from_data = True)
+TCHdrop_chart.set_categories(x_values)
+TCHdrop_chart.legend.position = 'b'
+hourly_sheet.add_chart(TCHdrop_chart, "A98")
+
+SDdrop_chart = LineChart()
+SDdrop_chart.width = 40
+SDdrop_chart.height = 10
+SDdrop_chart.add_data(SDCCHDropRate, titles_from_data = True)
+SDdrop_chart.add_data(SDCCHDropRate900, titles_from_data = True)
+SDdrop_chart.add_data(SDCCHDropRate1800, titles_from_data = True)
+SDdrop_chart.set_categories(x_values)
+SDdrop_chart.legend.position = 'b'
+hourly_sheet.add_chart(SDdrop_chart, "A118")
+
+HOSR_chart = LineChart()
+HOSR_chart.width = 40
+HOSR_chart.height = 10
+HOSR_chart.add_data(HandoverSuccessRate, titles_from_data = True)
+HOSR_chart.add_data(HandoverSuccessRate900, titles_from_data = True)
+HOSR_chart.add_data(HandoverSuccessRate1800, titles_from_data = True)
+HOSR_chart.set_categories(x_values)
+HOSR_chart.legend.position = 'b'
+hourly_sheet.add_chart(HOSR_chart, "A138")
+
+Assignment_chart = LineChart()
+Assignment_chart.width = 40
+Assignment_chart.height = 10
+Assignment_chart.add_data(TCHAssignmentFailureRate, titles_from_data = True)
+Assignment_chart.add_data(TCHAssignmentFailureRate900, titles_from_data = True)
+Assignment_chart.add_data(TCHAssignmentFailureRate1800, titles_from_data = True)
+Assignment_chart.set_categories(x_values)
+Assignment_chart.legend.position = 'b'
+hourly_sheet.add_chart(Assignment_chart, "A158")
+
+ImmAssignment_chart = LineChart()
+ImmAssignment_chart.width = 40
+ImmAssignment_chart.height = 10
+ImmAssignment_chart.add_data(ImmediateassignmentSR, titles_from_data = True)
+ImmAssignment_chart.add_data(ImmediateassignmentSR900, titles_from_data = True)
+ImmAssignment_chart.add_data(ImmediateassignmentSR1800, titles_from_data = True)
+ImmAssignment_chart.set_categories(x_values)
+ImmAssignment_chart.legend.position = 'b'
+hourly_sheet.add_chart(ImmAssignment_chart, "A178")
+
+CSSR_chart = LineChart()
+CSSR_chart.width = 40
+CSSR_chart.height = 10
+CSSR_chart.add_data(CCSR2G, titles_from_data = True)
+CSSR_chart.add_data(CCSR2G900, titles_from_data = True)
+CSSR_chart.add_data(CCSR2G1800, titles_from_data = True)
+CSSR_chart.set_categories(x_values)
+CSSR_chart.legend.position = 'b'
+hourly_sheet.add_chart(CSSR_chart, "A198")
+
+TRXavailability_chart = LineChart()
+TRXavailability_chart.width = 40
+TRXavailability_chart.height = 10
+TRXavailability_chart.add_data(TRXAvailability2G, titles_from_data = True)
+TRXavailability_chart.add_data(TRXAvailability2G900, titles_from_data = True)
+TRXavailability_chart.add_data(TRXAvailability2G1800, titles_from_data = True)
+TRXavailability_chart.set_categories(x_values)
+TRXavailability_chart.legend.position = 'b'
+hourly_sheet.add_chart(TRXavailability_chart, "A218")
+
+# графики в чнн BH busyhour_sheet   last_row_BH
+x_values = Reference(busyhour_sheet, range_string=(f"busy_hour!$A$2:$A${last_row_BH}"))
+
+TRXAvailability2G= Reference(busyhour_sheet, min_col=3, min_row=1, max_row=last_row_BH)
+TRXsNumber= Reference(busyhour_sheet, min_col=4, min_row=1, max_row=last_row_BH)
+TCHtraffic2GErl= Reference(busyhour_sheet, min_col=5, min_row=1, max_row=last_row_BH)
+SDCCHtafficErl= Reference(busyhour_sheet, min_col=6, min_row=1, max_row=last_row_BH)
+SDCCHCongesstion= Reference(busyhour_sheet, min_col=7, min_row=1, max_row=last_row_BH)
+TCHCongestionexcludinghandover= Reference(busyhour_sheet, min_col=8, min_row=1, max_row=last_row_BH)
+TCHCongestionincludinghandover= Reference(busyhour_sheet, min_col=9, min_row=1, max_row=last_row_BH)
+SDCCHDropRate= Reference(busyhour_sheet, min_col=10, min_row=1, max_row=last_row_BH)
+TCHAssignmentFailureRate= Reference(busyhour_sheet, min_col=11, min_row=1, max_row=last_row_BH)
+TCHtrafficHalfRateErl= Reference(busyhour_sheet, min_col=12, min_row=1, max_row=last_row_BH)
+TCHDropRate= Reference(busyhour_sheet, min_col=13, min_row=1, max_row=last_row_BH)
+HandoverSuccessRate= Reference(busyhour_sheet, min_col=14, min_row=1, max_row=last_row_BH)
+ImmediateassignmentSR= Reference(busyhour_sheet, min_col=15, min_row=1, max_row=last_row_BH)
+CCSR2G= Reference(busyhour_sheet, min_col=16, min_row=1, max_row=last_row_BH)
+TRXAvailability2G900= Reference(busyhour_sheet, min_col=17, min_row=1, max_row=last_row_BH)
+TRXsNumber900= Reference(busyhour_sheet, min_col=18, min_row=1, max_row=last_row_BH)
+TCHtraffic2GErl900= Reference(busyhour_sheet, min_col=19, min_row=1, max_row=last_row_BH)
+SDCCHtafficErl900= Reference(busyhour_sheet, min_col=20, min_row=1, max_row=last_row_BH)
+SDCCHCongesstion900= Reference(busyhour_sheet, min_col=21, min_row=1, max_row=last_row_BH)
+TCHCongestionexcludinghandover900= Reference(busyhour_sheet, min_col=22, min_row=1, max_row=last_row_BH)
+TCHCongestionincludinghandover900= Reference(busyhour_sheet, min_col=23, min_row=1, max_row=last_row_BH)
+SDCCHDropRate900= Reference(busyhour_sheet, min_col=24, min_row=1, max_row=last_row_BH)
+TCHAssignmentFailureRate900= Reference(busyhour_sheet, min_col=25, min_row=1, max_row=last_row_BH)
+TCHtrafficHalfRateErl900= Reference(busyhour_sheet, min_col=26, min_row=1, max_row=last_row_BH)
+TCHDropRate900= Reference(busyhour_sheet, min_col=27, min_row=1, max_row=last_row_BH)
+HandoverSuccessRate900= Reference(busyhour_sheet, min_col=28, min_row=1, max_row=last_row_BH)
+ImmediateassignmentSR900= Reference(busyhour_sheet, min_col=29, min_row=1, max_row=last_row_BH)
+CCSR2G900= Reference(busyhour_sheet, min_col=30, min_row=1, max_row=last_row_BH)
+TRXAvailability2G1800= Reference(busyhour_sheet, min_col=31, min_row=1, max_row=last_row_BH)
+TRXsNumber1800= Reference(busyhour_sheet, min_col=32, min_row=1, max_row=last_row_BH)
+TCHtraffic2GErl1800= Reference(busyhour_sheet, min_col=33, min_row=1, max_row=last_row_BH)
+SDCCHtafficErl1800= Reference(busyhour_sheet, min_col=34, min_row=1, max_row=last_row_BH)
+SDCCHCongesstion1800= Reference(busyhour_sheet, min_col=35, min_row=1, max_row=last_row_BH)
+TCHCongestionexcludinghandover1800= Reference(busyhour_sheet, min_col=36, min_row=1, max_row=last_row_BH)
+TCHCongestionincludinghandover1800= Reference(busyhour_sheet, min_col=37, min_row=1, max_row=last_row_BH)
+SDCCHDropRate1800= Reference(busyhour_sheet, min_col=38, min_row=1, max_row=last_row_BH)
+TCHAssignmentFailureRate1800= Reference(busyhour_sheet, min_col=39, min_row=1, max_row=last_row_BH)
+TCHtrafficHalfRateErl1800= Reference(busyhour_sheet, min_col=40, min_row=1, max_row=last_row_BH)
+TCHDropRate1800= Reference(busyhour_sheet, min_col=41, min_row=1, max_row=last_row_BH)
+HandoverSuccessRate1800= Reference(busyhour_sheet, min_col=42, min_row=1, max_row=last_row_BH)
+ImmediateassignmentSR1800= Reference(busyhour_sheet, min_col=43, min_row=1, max_row=last_row_BH)
+CCSR2G1800= Reference(busyhour_sheet, min_col=44, min_row=1, max_row=last_row_BH)
+
+traffic_chart = LineChart()
+traffic_chart.width = 40
+traffic_chart.height = 10
+traffic_chart.add_data(TCHtraffic2GErl, titles_from_data = True)  #
+traffic_chart.add_data(TCHtraffic2GErl900, titles_from_data = True)
+traffic_chart.add_data(TCHtraffic2GErl1800, titles_from_data = True)
+traffic_chart.set_categories(x_values)
+traffic_chart.legend.position = 'b'
+busyhour_sheet.add_chart(traffic_chart, "A18")
+
+SDtraffic_chart = LineChart()
+SDtraffic_chart.width = 40
+SDtraffic_chart.height = 10
+SDtraffic_chart.add_data(SDCCHtafficErl, titles_from_data = True)  #
+SDtraffic_chart.add_data(SDCCHtafficErl900, titles_from_data = True)
+SDtraffic_chart.add_data(SDCCHtafficErl1800, titles_from_data = True)
+SDtraffic_chart.set_categories(x_values)
+SDtraffic_chart.legend.position = 'b'
+busyhour_sheet.add_chart(SDtraffic_chart, "A38")
+
+SDcong_chart = LineChart()
+SDcong_chart.width = 40
+SDcong_chart.height = 10
+SDcong_chart.add_data(SDCCHCongesstion, titles_from_data = True)  #
+SDcong_chart.add_data(SDCCHCongesstion900, titles_from_data = True)
+SDcong_chart.add_data(SDCCHCongesstion1800, titles_from_data = True)
+SDcong_chart.set_categories(x_values)
+SDcong_chart.legend.position = 'b'
+busyhour_sheet.add_chart(SDcong_chart, "A58")
+
+TCHcong_chart = LineChart()
+TCHcong_chart.width = 40
+TCHcong_chart.height = 10
+TCHcong_chart.add_data(TCHCongestionexcludinghandover, titles_from_data = True)  #
+TCHcong_chart.add_data(TCHCongestionexcludinghandover900, titles_from_data = True)
+TCHcong_chart.add_data(TCHCongestionexcludinghandover1800, titles_from_data = True)
+TCHcong_chart.add_data(TCHCongestionincludinghandover, titles_from_data = True)  #
+TCHcong_chart.add_data(TCHCongestionincludinghandover900, titles_from_data = True)
+TCHcong_chart.add_data(TCHCongestionincludinghandover1800, titles_from_data = True)
+TCHcong_chart.set_categories(x_values)
+TCHcong_chart.legend.position = 'b'
+busyhour_sheet.add_chart(TCHcong_chart, "A78")
+
+TCHdrop_chart = LineChart()
+TCHdrop_chart.width = 40
+TCHdrop_chart.height = 10
+TCHdrop_chart.add_data(TCHDropRate, titles_from_data = True)
+TCHdrop_chart.add_data(TCHDropRate900, titles_from_data = True)
+TCHdrop_chart.add_data(TCHDropRate1800, titles_from_data = True)
+TCHdrop_chart.set_categories(x_values)
+TCHdrop_chart.legend.position = 'b'
+busyhour_sheet.add_chart(TCHdrop_chart, "A98")
+
+SDdrop_chart = LineChart()
+SDdrop_chart.width = 40
+SDdrop_chart.height = 10
+SDdrop_chart.add_data(SDCCHDropRate, titles_from_data = True)
+SDdrop_chart.add_data(SDCCHDropRate900, titles_from_data = True)
+SDdrop_chart.add_data(SDCCHDropRate1800, titles_from_data = True)
+SDdrop_chart.set_categories(x_values)
+SDdrop_chart.legend.position = 'b'
+busyhour_sheet.add_chart(SDdrop_chart, "A118")
+
+HOSR_chart = LineChart()
+HOSR_chart.width = 40
+HOSR_chart.height = 10
+HOSR_chart.add_data(HandoverSuccessRate, titles_from_data = True)
+HOSR_chart.add_data(HandoverSuccessRate900, titles_from_data = True)
+HOSR_chart.add_data(HandoverSuccessRate1800, titles_from_data = True)
+HOSR_chart.set_categories(x_values)
+HOSR_chart.legend.position = 'b'
+busyhour_sheet.add_chart(HOSR_chart, "A138")
+
+Assignment_chart = LineChart()
+Assignment_chart.width = 40
+Assignment_chart.height = 10
+Assignment_chart.add_data(TCHAssignmentFailureRate, titles_from_data = True)
+Assignment_chart.add_data(TCHAssignmentFailureRate900, titles_from_data = True)
+Assignment_chart.add_data(TCHAssignmentFailureRate1800, titles_from_data = True)
+Assignment_chart.set_categories(x_values)
+Assignment_chart.legend.position = 'b'
+busyhour_sheet.add_chart(Assignment_chart, "A158")
+
+ImmAssignment_chart = LineChart()
+ImmAssignment_chart.width = 40
+ImmAssignment_chart.height = 10
+ImmAssignment_chart.add_data(ImmediateassignmentSR, titles_from_data = True)
+ImmAssignment_chart.add_data(ImmediateassignmentSR900, titles_from_data = True)
+ImmAssignment_chart.add_data(ImmediateassignmentSR1800, titles_from_data = True)
+ImmAssignment_chart.set_categories(x_values)
+ImmAssignment_chart.legend.position = 'b'
+busyhour_sheet.add_chart(ImmAssignment_chart, "A178")
+
+CSSR_chart = LineChart()
+CSSR_chart.width = 40
+CSSR_chart.height = 10
+CSSR_chart.add_data(CCSR2G, titles_from_data = True)
+CSSR_chart.add_data(CCSR2G900, titles_from_data = True)
+CSSR_chart.add_data(CCSR2G1800, titles_from_data = True)
+CSSR_chart.set_categories(x_values)
+CSSR_chart.legend.position = 'b'
+busyhour_sheet.add_chart(CSSR_chart, "A198")
+
+TRXavailability_chart = LineChart()
+TRXavailability_chart.width = 40
+TRXavailability_chart.height = 10
+TRXavailability_chart.add_data(TRXAvailability2G, titles_from_data = True)
+TRXavailability_chart.add_data(TRXAvailability2G900, titles_from_data = True)
+TRXavailability_chart.add_data(TRXAvailability2G1800, titles_from_data = True)
+TRXavailability_chart.set_categories(x_values)
+TRXavailability_chart.legend.position = 'b'
+busyhour_sheet.add_chart(TRXavailability_chart, "A218")
+
+my_file.save(f"{directory}{csv_name}{output_comment}.xlsx")
+
 
 frequency = 2500  # Set Frequency To 2500 Hertz
 duration = 1000  # Set Duration To 1000 ms == 1 second

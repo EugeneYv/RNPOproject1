@@ -1,14 +1,17 @@
 ﻿import pandas as pd
 import winsound
+import openpyxl
+from openpyxl.chart import (LineChart, Reference)
+import openpyxl.styles
 ''' количество активных сот 538!!! - используется для расчёта скорости HSDPA HSUPA
 вывод посуточной статистики для UMTS. импортный файл - в МАЕ вывести в формате xlsx два файла, потом в экселе переделать в csv
 '''
 active_cell_number = 471  # количество активных сот !!!!
 
-directory = 'C:/work/sts/3G/'
-csv_name1 = '3G_counters1_opt(2023-02-22'
-csv_name2 = '3G_counters2(2023-02-22'
-output_comment = '_output'  # что добавится в конце к названию файла
+directory = 'C:/work/Herson_audit/sts/3G/'
+csv_name1 = '3G_counters1(2023-03-09'
+csv_name2 = '3G_counters2(2023-03-09'
+output_comment = '_outputn'  # что добавится в конце к названию файла
 
 #sts1_df = pd.read_excel(f"{directory}{csv_name1}.xlsx", header=7, na_values='NIL')
 sts1_df = pd.read_csv(f"{directory}{csv_name1}.csv", sep=";", header=7, na_values='NIL')
@@ -2060,7 +2063,7 @@ weekly_df['PS traffic 3G UL+DL, GB'] = (weekly_df['VS.HSUPA.MeanChThroughput.Tot
                                       weekly_df['VS.PS.Int.UL.144.Traffic (bit)'] + weekly_df['VS.PS.Int.UL.256.Traffic (bit)'] + weekly_df['VS.PS.Int.UL.384.Traffic (bit)'] + \
                                       weekly_df['VS.PS.Str.DL.32.Traffic (bit)'] + weekly_df['VS.PS.Str.DL.64.Traffic (bit)'] + weekly_df['VS.PS.Str.DL.128.Traffic (bit)'] + \
                                       weekly_df['VS.PS.Str.DL.144.Traffic (bit)'] + weekly_df['VS.PS.Str.UL.16.Traffic (bit)'] + weekly_df['VS.PS.Str.UL.32.Traffic (bit)'] + \
-                                      weekly_df['VS.PS.Str.UL.64.Traffic (bit)'] + weekly_df['VS.HSDPA.MeanChThroughput.TotalBytes (byte)']) / 1000000
+                                      weekly_df['VS.PS.Str.UL.64.Traffic (bit)'] + weekly_df['VS.HSDPA.MeanChThroughput.TotalBytes (byte)']) / 1024/1024/1024
 weekly_df['CS RAB Drop Rate (%)'] = weekly_df['VS.RAB.AbnormRel.CS (None)'] / (weekly_df['VS.RAB.AbnormRel.CS (None)'] + weekly_df['VS.RAB.NormRel.CS (None)']) * 100
 weekly_df['PS Blocking Rate (%)'] = (weekly_df['VS.RAB.FailEstabPS.DLIUBBand.Cong (None)'] + weekly_df['VS.RAB.FailEstabPS.ULIUBBand.Cong (None)'] + weekly_df['VS.RAB.FailEstabPS.ULCE.Cong (None)'] + \
                                     weekly_df['VS.RAB.FailEstabPS.DLCE.Cong (None)'] + weekly_df['VS.RAB.FailEstabPS.Code.Cong (None)'] + weekly_df['VS.RAB.FailEstabPS.ULPower.Cong (None)'] + \
@@ -2107,7 +2110,7 @@ weekly_df['RAB Assignment Success Rate (PS), %'] = (weekly_df['VS.RAB.SuccEstabP
 weekly_df['CCSR3G, %'] = weekly_df['RRC Assignment SucessRate (CS BH), %'] * (100 - weekly_df['RRC Drop Rate (CS BH), %']) * weekly_df['RAB Assignment Success Rate (CS), %'] * (100 - weekly_df['CS RAB Drop Rate (%)'])/ 1000000
 weekly_df['DCSR3G, %'] = weekly_df['RRC Assignment SucessRate (PS BH), %'] * (100 - weekly_df['RRC Drop Rate (PS BH), %']) * weekly_df['RAB Assignment Success Rate (PS), %'] * (100 - weekly_df['PS RAB Drop Rate (%)'])/ 1000000
 weekly_df = weekly_df.drop(list_1, axis=1)
-weekly_df = weekly_df.transpose()
+weekly_df_trans = weekly_df.transpose()
 
 
 # ===обработка daily===
@@ -2126,7 +2129,7 @@ daily_df['PS traffic 3G UL+DL, GB'] = (daily_df['VS.HSUPA.MeanChThroughput.Total
                                       daily_df['VS.PS.Int.UL.144.Traffic (bit)'] + daily_df['VS.PS.Int.UL.256.Traffic (bit)'] + daily_df['VS.PS.Int.UL.384.Traffic (bit)'] + \
                                       daily_df['VS.PS.Str.DL.32.Traffic (bit)'] + daily_df['VS.PS.Str.DL.64.Traffic (bit)'] + daily_df['VS.PS.Str.DL.128.Traffic (bit)'] + \
                                       daily_df['VS.PS.Str.DL.144.Traffic (bit)'] + daily_df['VS.PS.Str.UL.16.Traffic (bit)'] + daily_df['VS.PS.Str.UL.32.Traffic (bit)'] + \
-                                      daily_df['VS.PS.Str.UL.64.Traffic (bit)'] + daily_df['VS.HSDPA.MeanChThroughput.TotalBytes (byte)']) / 1000000
+                                      daily_df['VS.PS.Str.UL.64.Traffic (bit)'] + daily_df['VS.HSDPA.MeanChThroughput.TotalBytes (byte)']) / 1024/1024/1024
 daily_df['CS RAB Drop Rate (%)'] = daily_df['VS.RAB.AbnormRel.CS (None)'] / (daily_df['VS.RAB.AbnormRel.CS (None)'] + daily_df['VS.RAB.NormRel.CS (None)']) * 100
 daily_df['PS Blocking Rate (%)'] = (daily_df['VS.RAB.FailEstabPS.DLIUBBand.Cong (None)'] + daily_df['VS.RAB.FailEstabPS.ULIUBBand.Cong (None)'] + daily_df['VS.RAB.FailEstabPS.ULCE.Cong (None)'] + \
                                     daily_df['VS.RAB.FailEstabPS.DLCE.Cong (None)'] + daily_df['VS.RAB.FailEstabPS.Code.Cong (None)'] + daily_df['VS.RAB.FailEstabPS.ULPower.Cong (None)'] + \
@@ -2190,7 +2193,7 @@ daily_dfU2100['PS traffic 3G UL+DL, GB_U2100'] = (daily_dfU2100['VS.HSUPA.MeanCh
                                       daily_dfU2100['VS.PS.Int.UL.144.Traffic (bit)'] + daily_dfU2100['VS.PS.Int.UL.256.Traffic (bit)'] + daily_dfU2100['VS.PS.Int.UL.384.Traffic (bit)'] + \
                                       daily_dfU2100['VS.PS.Str.DL.32.Traffic (bit)'] + daily_dfU2100['VS.PS.Str.DL.64.Traffic (bit)'] + daily_dfU2100['VS.PS.Str.DL.128.Traffic (bit)'] + \
                                       daily_dfU2100['VS.PS.Str.DL.144.Traffic (bit)'] + daily_dfU2100['VS.PS.Str.UL.16.Traffic (bit)'] + daily_dfU2100['VS.PS.Str.UL.32.Traffic (bit)'] + \
-                                      daily_dfU2100['VS.PS.Str.UL.64.Traffic (bit)'] + daily_dfU2100['VS.HSDPA.MeanChThroughput.TotalBytes (byte)']) / 1000000
+                                      daily_dfU2100['VS.PS.Str.UL.64.Traffic (bit)'] + daily_dfU2100['VS.HSDPA.MeanChThroughput.TotalBytes (byte)']) / 1024/1024/1024
 daily_dfU2100['CS RAB Drop Rate (%)_U2100'] = daily_dfU2100['VS.RAB.AbnormRel.CS (None)'] / (daily_dfU2100['VS.RAB.AbnormRel.CS (None)'] + daily_dfU2100['VS.RAB.NormRel.CS (None)']) * 100
 daily_dfU2100['PS Blocking Rate (%)_U2100'] = (daily_dfU2100['VS.RAB.FailEstabPS.DLIUBBand.Cong (None)'] + daily_dfU2100['VS.RAB.FailEstabPS.ULIUBBand.Cong (None)'] + daily_dfU2100['VS.RAB.FailEstabPS.ULCE.Cong (None)'] + \
                                     daily_dfU2100['VS.RAB.FailEstabPS.DLCE.Cong (None)'] + daily_dfU2100['VS.RAB.FailEstabPS.Code.Cong (None)'] + daily_dfU2100['VS.RAB.FailEstabPS.ULPower.Cong (None)'] + \
@@ -2254,7 +2257,7 @@ daily_dfU900['PS traffic 3G UL+DL, GB_U900'] = (daily_dfU900['VS.HSUPA.MeanChThr
                                       daily_dfU900['VS.PS.Int.UL.144.Traffic (bit)'] + daily_dfU900['VS.PS.Int.UL.256.Traffic (bit)'] + daily_dfU900['VS.PS.Int.UL.384.Traffic (bit)'] + \
                                       daily_dfU900['VS.PS.Str.DL.32.Traffic (bit)'] + daily_dfU900['VS.PS.Str.DL.64.Traffic (bit)'] + daily_dfU900['VS.PS.Str.DL.128.Traffic (bit)'] + \
                                       daily_dfU900['VS.PS.Str.DL.144.Traffic (bit)'] + daily_dfU900['VS.PS.Str.UL.16.Traffic (bit)'] + daily_dfU900['VS.PS.Str.UL.32.Traffic (bit)'] + \
-                                      daily_dfU900['VS.PS.Str.UL.64.Traffic (bit)'] + daily_dfU900['VS.HSDPA.MeanChThroughput.TotalBytes (byte)']) / 1000000
+                                      daily_dfU900['VS.PS.Str.UL.64.Traffic (bit)'] + daily_dfU900['VS.HSDPA.MeanChThroughput.TotalBytes (byte)']) / 1024/1024/1024
 daily_dfU900['CS RAB Drop Rate (%)_U900'] = daily_dfU900['VS.RAB.AbnormRel.CS (None)'] / (daily_dfU900['VS.RAB.AbnormRel.CS (None)'] + daily_dfU900['VS.RAB.NormRel.CS (None)']) * 100
 daily_dfU900['PS Blocking Rate (%)_U900'] = (daily_dfU900['VS.RAB.FailEstabPS.DLIUBBand.Cong (None)'] + daily_dfU900['VS.RAB.FailEstabPS.ULIUBBand.Cong (None)'] + daily_dfU900['VS.RAB.FailEstabPS.ULCE.Cong (None)'] + \
                                     daily_dfU900['VS.RAB.FailEstabPS.DLCE.Cong (None)'] + daily_dfU900['VS.RAB.FailEstabPS.Code.Cong (None)'] + daily_dfU900['VS.RAB.FailEstabPS.ULPower.Cong (None)'] + \
@@ -2317,7 +2320,7 @@ daily_df10612['PS traffic 3G UL+DL, GB_10612'] = (daily_df10612['VS.HSUPA.MeanCh
                                       daily_df10612['VS.PS.Int.UL.144.Traffic (bit)'] + daily_df10612['VS.PS.Int.UL.256.Traffic (bit)'] + daily_df10612['VS.PS.Int.UL.384.Traffic (bit)'] + \
                                       daily_df10612['VS.PS.Str.DL.32.Traffic (bit)'] + daily_df10612['VS.PS.Str.DL.64.Traffic (bit)'] + daily_df10612['VS.PS.Str.DL.128.Traffic (bit)'] + \
                                       daily_df10612['VS.PS.Str.DL.144.Traffic (bit)'] + daily_df10612['VS.PS.Str.UL.16.Traffic (bit)'] + daily_df10612['VS.PS.Str.UL.32.Traffic (bit)'] + \
-                                      daily_df10612['VS.PS.Str.UL.64.Traffic (bit)'] + daily_df10612['VS.HSDPA.MeanChThroughput.TotalBytes (byte)']) / 1000000
+                                      daily_df10612['VS.PS.Str.UL.64.Traffic (bit)'] + daily_df10612['VS.HSDPA.MeanChThroughput.TotalBytes (byte)']) / 1024/1024/1024
 daily_df10612['CS RAB Drop Rate (%)_10612'] = daily_df10612['VS.RAB.AbnormRel.CS (None)'] / (daily_df10612['VS.RAB.AbnormRel.CS (None)'] + daily_df10612['VS.RAB.NormRel.CS (None)']) * 100
 daily_df10612['PS Blocking Rate (%)_10612'] = (daily_df10612['VS.RAB.FailEstabPS.DLIUBBand.Cong (None)'] + daily_df10612['VS.RAB.FailEstabPS.ULIUBBand.Cong (None)'] + daily_df10612['VS.RAB.FailEstabPS.ULCE.Cong (None)'] + \
                                     daily_df10612['VS.RAB.FailEstabPS.DLCE.Cong (None)'] + daily_df10612['VS.RAB.FailEstabPS.Code.Cong (None)'] + daily_df10612['VS.RAB.FailEstabPS.ULPower.Cong (None)'] + \
@@ -2380,7 +2383,7 @@ daily_df10637['PS traffic 3G UL+DL, GB_10637'] = (daily_df10637['VS.HSUPA.MeanCh
                                       daily_df10637['VS.PS.Int.UL.144.Traffic (bit)'] + daily_df10637['VS.PS.Int.UL.256.Traffic (bit)'] + daily_df10637['VS.PS.Int.UL.384.Traffic (bit)'] + \
                                       daily_df10637['VS.PS.Str.DL.32.Traffic (bit)'] + daily_df10637['VS.PS.Str.DL.64.Traffic (bit)'] + daily_df10637['VS.PS.Str.DL.128.Traffic (bit)'] + \
                                       daily_df10637['VS.PS.Str.DL.144.Traffic (bit)'] + daily_df10637['VS.PS.Str.UL.16.Traffic (bit)'] + daily_df10637['VS.PS.Str.UL.32.Traffic (bit)'] + \
-                                      daily_df10637['VS.PS.Str.UL.64.Traffic (bit)'] + daily_df10637['VS.HSDPA.MeanChThroughput.TotalBytes (byte)']) / 1000000
+                                      daily_df10637['VS.PS.Str.UL.64.Traffic (bit)'] + daily_df10637['VS.HSDPA.MeanChThroughput.TotalBytes (byte)']) / 1024/1024/1024
 daily_df10637['CS RAB Drop Rate (%)_10637'] = daily_df10637['VS.RAB.AbnormRel.CS (None)'] / (daily_df10637['VS.RAB.AbnormRel.CS (None)'] + daily_df10637['VS.RAB.NormRel.CS (None)']) * 100
 daily_df10637['PS Blocking Rate (%)_10637'] = (daily_df10637['VS.RAB.FailEstabPS.DLIUBBand.Cong (None)'] + daily_df10637['VS.RAB.FailEstabPS.ULIUBBand.Cong (None)'] + daily_df10637['VS.RAB.FailEstabPS.ULCE.Cong (None)'] + \
                                     daily_df10637['VS.RAB.FailEstabPS.DLCE.Cong (None)'] + daily_df10637['VS.RAB.FailEstabPS.Code.Cong (None)'] + daily_df10637['VS.RAB.FailEstabPS.ULPower.Cong (None)'] + \
@@ -2443,7 +2446,7 @@ daily_df2937['PS traffic 3G UL+DL, GB_2937'] = (daily_df2937['VS.HSUPA.MeanChThr
                                       daily_df2937['VS.PS.Int.UL.144.Traffic (bit)'] + daily_df2937['VS.PS.Int.UL.256.Traffic (bit)'] + daily_df2937['VS.PS.Int.UL.384.Traffic (bit)'] + \
                                       daily_df2937['VS.PS.Str.DL.32.Traffic (bit)'] + daily_df2937['VS.PS.Str.DL.64.Traffic (bit)'] + daily_df2937['VS.PS.Str.DL.128.Traffic (bit)'] + \
                                       daily_df2937['VS.PS.Str.DL.144.Traffic (bit)'] + daily_df2937['VS.PS.Str.UL.16.Traffic (bit)'] + daily_df2937['VS.PS.Str.UL.32.Traffic (bit)'] + \
-                                      daily_df2937['VS.PS.Str.UL.64.Traffic (bit)'] + daily_df2937['VS.HSDPA.MeanChThroughput.TotalBytes (byte)']) / 1000000
+                                      daily_df2937['VS.PS.Str.UL.64.Traffic (bit)'] + daily_df2937['VS.HSDPA.MeanChThroughput.TotalBytes (byte)']) / 1024/1024/1024
 daily_df2937['CS RAB Drop Rate (%)_2937'] = daily_df2937['VS.RAB.AbnormRel.CS (None)'] / (daily_df2937['VS.RAB.AbnormRel.CS (None)'] + daily_df2937['VS.RAB.NormRel.CS (None)']) * 100
 daily_df2937['PS Blocking Rate (%)_2937'] = (daily_df2937['VS.RAB.FailEstabPS.DLIUBBand.Cong (None)'] + daily_df2937['VS.RAB.FailEstabPS.ULIUBBand.Cong (None)'] + daily_df2937['VS.RAB.FailEstabPS.ULCE.Cong (None)'] + \
                                     daily_df2937['VS.RAB.FailEstabPS.DLCE.Cong (None)'] + daily_df2937['VS.RAB.FailEstabPS.Code.Cong (None)'] + daily_df2937['VS.RAB.FailEstabPS.ULPower.Cong (None)'] + \
@@ -2495,7 +2498,7 @@ daily_dfall = pd.merge(daily_dfall, daily_dfU900, how="left")
 daily_dfall = pd.merge(daily_dfall, daily_df10612, how="left")
 daily_dfall = pd.merge(daily_dfall, daily_df10637, how="left")
 daily_dfall = pd.merge(daily_dfall, daily_df2937, how="left")
-daily_dfall = daily_dfall.transpose()
+daily_dfall_trans = daily_dfall.transpose()
 
 # ===обработка часовая===
 hourly_df = sts_df.groupby(['date', 'hour'])[list_1]. sum().reset_index()
@@ -2513,7 +2516,7 @@ hourly_df['PS traffic 3G UL+DL, GB'] = (hourly_df['VS.HSUPA.MeanChThroughput.Tot
                                       hourly_df['VS.PS.Int.UL.144.Traffic (bit)'] + hourly_df['VS.PS.Int.UL.256.Traffic (bit)'] + hourly_df['VS.PS.Int.UL.384.Traffic (bit)'] + \
                                       hourly_df['VS.PS.Str.DL.32.Traffic (bit)'] + hourly_df['VS.PS.Str.DL.64.Traffic (bit)'] + hourly_df['VS.PS.Str.DL.128.Traffic (bit)'] + \
                                       hourly_df['VS.PS.Str.DL.144.Traffic (bit)'] + hourly_df['VS.PS.Str.UL.16.Traffic (bit)'] + hourly_df['VS.PS.Str.UL.32.Traffic (bit)'] + \
-                                      hourly_df['VS.PS.Str.UL.64.Traffic (bit)'] + hourly_df['VS.HSDPA.MeanChThroughput.TotalBytes (byte)']) / 1000000
+                                      hourly_df['VS.PS.Str.UL.64.Traffic (bit)'] + hourly_df['VS.HSDPA.MeanChThroughput.TotalBytes (byte)']) / 1024/1024/1024
 hourly_df['CS RAB Drop Rate (%)'] = hourly_df['VS.RAB.AbnormRel.CS (None)'] / (hourly_df['VS.RAB.AbnormRel.CS (None)'] + hourly_df['VS.RAB.NormRel.CS (None)']) * 100
 hourly_df['PS Blocking Rate (%)'] = (hourly_df['VS.RAB.FailEstabPS.DLIUBBand.Cong (None)'] + hourly_df['VS.RAB.FailEstabPS.ULIUBBand.Cong (None)'] + hourly_df['VS.RAB.FailEstabPS.ULCE.Cong (None)'] + \
                                     hourly_df['VS.RAB.FailEstabPS.DLCE.Cong (None)'] + hourly_df['VS.RAB.FailEstabPS.Code.Cong (None)'] + hourly_df['VS.RAB.FailEstabPS.ULPower.Cong (None)'] + \
@@ -2577,7 +2580,7 @@ hourly_dfU2100['PS traffic 3G UL+DL, GB_U2100'] = (hourly_dfU2100['VS.HSUPA.Mean
                                       hourly_dfU2100['VS.PS.Int.UL.144.Traffic (bit)'] + hourly_dfU2100['VS.PS.Int.UL.256.Traffic (bit)'] + hourly_dfU2100['VS.PS.Int.UL.384.Traffic (bit)'] + \
                                       hourly_dfU2100['VS.PS.Str.DL.32.Traffic (bit)'] + hourly_dfU2100['VS.PS.Str.DL.64.Traffic (bit)'] + hourly_dfU2100['VS.PS.Str.DL.128.Traffic (bit)'] + \
                                       hourly_dfU2100['VS.PS.Str.DL.144.Traffic (bit)'] + hourly_dfU2100['VS.PS.Str.UL.16.Traffic (bit)'] + hourly_dfU2100['VS.PS.Str.UL.32.Traffic (bit)'] + \
-                                      hourly_dfU2100['VS.PS.Str.UL.64.Traffic (bit)'] + hourly_dfU2100['VS.HSDPA.MeanChThroughput.TotalBytes (byte)']) / 1000000
+                                      hourly_dfU2100['VS.PS.Str.UL.64.Traffic (bit)'] + hourly_dfU2100['VS.HSDPA.MeanChThroughput.TotalBytes (byte)']) / 1024/1024/1024
 hourly_dfU2100['CS RAB Drop Rate (%)_U2100'] = hourly_dfU2100['VS.RAB.AbnormRel.CS (None)'] / (hourly_dfU2100['VS.RAB.AbnormRel.CS (None)'] + hourly_dfU2100['VS.RAB.NormRel.CS (None)']) * 100
 hourly_dfU2100['PS Blocking Rate (%)_U2100'] = (hourly_dfU2100['VS.RAB.FailEstabPS.DLIUBBand.Cong (None)'] + hourly_dfU2100['VS.RAB.FailEstabPS.ULIUBBand.Cong (None)'] + hourly_dfU2100['VS.RAB.FailEstabPS.ULCE.Cong (None)'] + \
                                     hourly_dfU2100['VS.RAB.FailEstabPS.DLCE.Cong (None)'] + hourly_dfU2100['VS.RAB.FailEstabPS.Code.Cong (None)'] + hourly_dfU2100['VS.RAB.FailEstabPS.ULPower.Cong (None)'] + \
@@ -2641,7 +2644,7 @@ hourly_dfU900['PS traffic 3G UL+DL, GB_U900'] = (hourly_dfU900['VS.HSUPA.MeanChT
                                       hourly_dfU900['VS.PS.Int.UL.144.Traffic (bit)'] + hourly_dfU900['VS.PS.Int.UL.256.Traffic (bit)'] + hourly_dfU900['VS.PS.Int.UL.384.Traffic (bit)'] + \
                                       hourly_dfU900['VS.PS.Str.DL.32.Traffic (bit)'] + hourly_dfU900['VS.PS.Str.DL.64.Traffic (bit)'] + hourly_dfU900['VS.PS.Str.DL.128.Traffic (bit)'] + \
                                       hourly_dfU900['VS.PS.Str.DL.144.Traffic (bit)'] + hourly_dfU900['VS.PS.Str.UL.16.Traffic (bit)'] + hourly_dfU900['VS.PS.Str.UL.32.Traffic (bit)'] + \
-                                      hourly_dfU900['VS.PS.Str.UL.64.Traffic (bit)'] + hourly_dfU900['VS.HSDPA.MeanChThroughput.TotalBytes (byte)']) / 1000000
+                                      hourly_dfU900['VS.PS.Str.UL.64.Traffic (bit)'] + hourly_dfU900['VS.HSDPA.MeanChThroughput.TotalBytes (byte)']) / 1024/1024/1024
 hourly_dfU900['CS RAB Drop Rate (%)_U900'] = hourly_dfU900['VS.RAB.AbnormRel.CS (None)'] / (hourly_dfU900['VS.RAB.AbnormRel.CS (None)'] + hourly_dfU900['VS.RAB.NormRel.CS (None)']) * 100
 hourly_dfU900['PS Blocking Rate (%)_U900'] = (hourly_dfU900['VS.RAB.FailEstabPS.DLIUBBand.Cong (None)'] + hourly_dfU900['VS.RAB.FailEstabPS.ULIUBBand.Cong (None)'] + hourly_dfU900['VS.RAB.FailEstabPS.ULCE.Cong (None)'] + \
                                     hourly_dfU900['VS.RAB.FailEstabPS.DLCE.Cong (None)'] + hourly_dfU900['VS.RAB.FailEstabPS.Code.Cong (None)'] + hourly_dfU900['VS.RAB.FailEstabPS.ULPower.Cong (None)'] + \
@@ -2704,7 +2707,7 @@ hourly_df10612['PS traffic 3G UL+DL, GB_10612'] = (hourly_df10612['VS.HSUPA.Mean
                                       hourly_df10612['VS.PS.Int.UL.144.Traffic (bit)'] + hourly_df10612['VS.PS.Int.UL.256.Traffic (bit)'] + hourly_df10612['VS.PS.Int.UL.384.Traffic (bit)'] + \
                                       hourly_df10612['VS.PS.Str.DL.32.Traffic (bit)'] + hourly_df10612['VS.PS.Str.DL.64.Traffic (bit)'] + hourly_df10612['VS.PS.Str.DL.128.Traffic (bit)'] + \
                                       hourly_df10612['VS.PS.Str.DL.144.Traffic (bit)'] + hourly_df10612['VS.PS.Str.UL.16.Traffic (bit)'] + hourly_df10612['VS.PS.Str.UL.32.Traffic (bit)'] + \
-                                      hourly_df10612['VS.PS.Str.UL.64.Traffic (bit)'] + hourly_df10612['VS.HSDPA.MeanChThroughput.TotalBytes (byte)']) / 1000000
+                                      hourly_df10612['VS.PS.Str.UL.64.Traffic (bit)'] + hourly_df10612['VS.HSDPA.MeanChThroughput.TotalBytes (byte)']) / 1024/1024/1024
 hourly_df10612['CS RAB Drop Rate (%)_10612'] = hourly_df10612['VS.RAB.AbnormRel.CS (None)'] / (hourly_df10612['VS.RAB.AbnormRel.CS (None)'] + hourly_df10612['VS.RAB.NormRel.CS (None)']) * 100
 hourly_df10612['PS Blocking Rate (%)_10612'] = (hourly_df10612['VS.RAB.FailEstabPS.DLIUBBand.Cong (None)'] + hourly_df10612['VS.RAB.FailEstabPS.ULIUBBand.Cong (None)'] + hourly_df10612['VS.RAB.FailEstabPS.ULCE.Cong (None)'] + \
                                     hourly_df10612['VS.RAB.FailEstabPS.DLCE.Cong (None)'] + hourly_df10612['VS.RAB.FailEstabPS.Code.Cong (None)'] + hourly_df10612['VS.RAB.FailEstabPS.ULPower.Cong (None)'] + \
@@ -2767,7 +2770,7 @@ hourly_df10637['PS traffic 3G UL+DL, GB_10637'] = (hourly_df10637['VS.HSUPA.Mean
                                       hourly_df10637['VS.PS.Int.UL.144.Traffic (bit)'] + hourly_df10637['VS.PS.Int.UL.256.Traffic (bit)'] + hourly_df10637['VS.PS.Int.UL.384.Traffic (bit)'] + \
                                       hourly_df10637['VS.PS.Str.DL.32.Traffic (bit)'] + hourly_df10637['VS.PS.Str.DL.64.Traffic (bit)'] + hourly_df10637['VS.PS.Str.DL.128.Traffic (bit)'] + \
                                       hourly_df10637['VS.PS.Str.DL.144.Traffic (bit)'] + hourly_df10637['VS.PS.Str.UL.16.Traffic (bit)'] + hourly_df10637['VS.PS.Str.UL.32.Traffic (bit)'] + \
-                                      hourly_df10637['VS.PS.Str.UL.64.Traffic (bit)'] + hourly_df10637['VS.HSDPA.MeanChThroughput.TotalBytes (byte)']) / 1000000
+                                      hourly_df10637['VS.PS.Str.UL.64.Traffic (bit)'] + hourly_df10637['VS.HSDPA.MeanChThroughput.TotalBytes (byte)']) / 1024/1024/1024
 hourly_df10637['CS RAB Drop Rate (%)_10637'] = hourly_df10637['VS.RAB.AbnormRel.CS (None)'] / (hourly_df10637['VS.RAB.AbnormRel.CS (None)'] + hourly_df10637['VS.RAB.NormRel.CS (None)']) * 100
 hourly_df10637['PS Blocking Rate (%)_10637'] = (hourly_df10637['VS.RAB.FailEstabPS.DLIUBBand.Cong (None)'] + hourly_df10637['VS.RAB.FailEstabPS.ULIUBBand.Cong (None)'] + hourly_df10637['VS.RAB.FailEstabPS.ULCE.Cong (None)'] + \
                                     hourly_df10637['VS.RAB.FailEstabPS.DLCE.Cong (None)'] + hourly_df10637['VS.RAB.FailEstabPS.Code.Cong (None)'] + hourly_df10637['VS.RAB.FailEstabPS.ULPower.Cong (None)'] + \
@@ -2830,7 +2833,7 @@ hourly_df2937['PS traffic 3G UL+DL, GB_2937'] = (hourly_df2937['VS.HSUPA.MeanChT
                                       hourly_df2937['VS.PS.Int.UL.144.Traffic (bit)'] + hourly_df2937['VS.PS.Int.UL.256.Traffic (bit)'] + hourly_df2937['VS.PS.Int.UL.384.Traffic (bit)'] + \
                                       hourly_df2937['VS.PS.Str.DL.32.Traffic (bit)'] + hourly_df2937['VS.PS.Str.DL.64.Traffic (bit)'] + hourly_df2937['VS.PS.Str.DL.128.Traffic (bit)'] + \
                                       hourly_df2937['VS.PS.Str.DL.144.Traffic (bit)'] + hourly_df2937['VS.PS.Str.UL.16.Traffic (bit)'] + hourly_df2937['VS.PS.Str.UL.32.Traffic (bit)'] + \
-                                      hourly_df2937['VS.PS.Str.UL.64.Traffic (bit)'] + hourly_df2937['VS.HSDPA.MeanChThroughput.TotalBytes (byte)']) / 1000000
+                                      hourly_df2937['VS.PS.Str.UL.64.Traffic (bit)'] + hourly_df2937['VS.HSDPA.MeanChThroughput.TotalBytes (byte)']) / 1024/1024/1024
 hourly_df2937['CS RAB Drop Rate (%)_2937'] = hourly_df2937['VS.RAB.AbnormRel.CS (None)'] / (hourly_df2937['VS.RAB.AbnormRel.CS (None)'] + hourly_df2937['VS.RAB.NormRel.CS (None)']) * 100
 hourly_df2937['PS Blocking Rate (%)_2937'] = (hourly_df2937['VS.RAB.FailEstabPS.DLIUBBand.Cong (None)'] + hourly_df2937['VS.RAB.FailEstabPS.ULIUBBand.Cong (None)'] + hourly_df2937['VS.RAB.FailEstabPS.ULCE.Cong (None)'] + \
                                     hourly_df2937['VS.RAB.FailEstabPS.DLCE.Cong (None)'] + hourly_df2937['VS.RAB.FailEstabPS.Code.Cong (None)'] + hourly_df2937['VS.RAB.FailEstabPS.ULPower.Cong (None)'] + \
@@ -2882,7 +2885,7 @@ hourly_dfall = pd.merge(hourly_dfall, hourly_dfU900, how="left")
 hourly_dfall = pd.merge(hourly_dfall, hourly_df10612, how="left")
 hourly_dfall = pd.merge(hourly_dfall, hourly_df10637, how="left")
 hourly_dfall = pd.merge(hourly_dfall, hourly_df2937, how="left")
-hourly_dfall = hourly_dfall.transpose()
+hourly_dfall_trans = hourly_dfall.transpose()
 
 
 #####
@@ -2906,7 +2909,7 @@ hourlyPS_df['PS traffic 3G UL+DL, GB'] = (hourlyPS_df['VS.HSUPA.MeanChThroughput
                                       hourlyPS_df['VS.PS.Int.UL.144.Traffic (bit)'] + hourlyPS_df['VS.PS.Int.UL.256.Traffic (bit)'] + hourlyPS_df['VS.PS.Int.UL.384.Traffic (bit)'] + \
                                       hourlyPS_df['VS.PS.Str.DL.32.Traffic (bit)'] + hourlyPS_df['VS.PS.Str.DL.64.Traffic (bit)'] + hourlyPS_df['VS.PS.Str.DL.128.Traffic (bit)'] + \
                                       hourlyPS_df['VS.PS.Str.DL.144.Traffic (bit)'] + hourlyPS_df['VS.PS.Str.UL.16.Traffic (bit)'] + hourlyPS_df['VS.PS.Str.UL.32.Traffic (bit)'] + \
-                                      hourlyPS_df['VS.PS.Str.UL.64.Traffic (bit)'] + hourlyPS_df['VS.HSDPA.MeanChThroughput.TotalBytes (byte)']) / 1000000
+                                      hourlyPS_df['VS.PS.Str.UL.64.Traffic (bit)'] + hourlyPS_df['VS.HSDPA.MeanChThroughput.TotalBytes (byte)']) / 1024/1024/1024
 hourlyCS_df['CS RAB Drop Rate (%)'] = hourlyCS_df['VS.RAB.AbnormRel.CS (None)'] / (hourlyCS_df['VS.RAB.AbnormRel.CS (None)'] + hourlyCS_df['VS.RAB.NormRel.CS (None)']) * 100
 hourlyPS_df['PS Blocking Rate (%)'] = (hourlyPS_df['VS.RAB.FailEstabPS.DLIUBBand.Cong (None)'] + hourlyPS_df['VS.RAB.FailEstabPS.ULIUBBand.Cong (None)'] + hourlyPS_df['VS.RAB.FailEstabPS.ULCE.Cong (None)'] + \
                                     hourlyPS_df['VS.RAB.FailEstabPS.DLCE.Cong (None)'] + hourlyPS_df['VS.RAB.FailEstabPS.Code.Cong (None)'] + hourlyPS_df['VS.RAB.FailEstabPS.ULPower.Cong (None)'] + \
@@ -2952,9 +2955,9 @@ hourlyPS_df['RAB Assignment Success Rate (PS), %'] = (hourlyPS_df['VS.RAB.SuccEs
 hourlyCS_df['CCSR3G, %'] = hourlyCS_df['RRC Assignment SucessRate (CS BH), %'] * (100 - hourlyCS_df['RRC Drop Rate (CS BH), %']) * hourlyCS_df['RAB Assignment Success Rate (CS), %'] * (100 - hourlyCS_df['CS RAB Drop Rate (%)'])/ 1000000
 hourlyPS_df['DCSR3G, %'] = hourlyPS_df['RRC Assignment SucessRate (PS BH), %'] * (100 - hourlyPS_df['RRC Drop Rate (PS BH), %']) * hourlyPS_df['RAB Assignment Success Rate (PS), %'] * (100 - hourlyPS_df['PS RAB Drop Rate (%)'])/ 1000000
 hourlyCS_df = hourlyCS_df.drop(list_1, axis=1)
-hourlyCS_df = hourlyCS_df.transpose()
+hourlyCS_df_trans = hourlyCS_df.transpose()
 hourlyPS_df = hourlyPS_df.drop(list_1, axis=1)
-hourlyPS_df = hourlyPS_df.transpose()
+hourlyPS_df_trans = hourlyPS_df.transpose()
 
 
 #daily_df.to_excel("C:/test/sts3G/daily_df.xls", engine='openpyxl', sheet_name='Book2')
@@ -2966,7 +2969,724 @@ with pd.ExcelWriter(f"{directory}{csv_name1}{output_comment}.xlsx", engine='open
     hourly_dfall.to_excel(writer, sheet_name='hourly')
     hourlyCS_df.to_excel(writer, sheet_name='busy_hourCS')
     hourlyPS_df.to_excel(writer, sheet_name='busy_hourPS')
+    weekly_df_trans.to_excel(writer, sheet_name='weekly_trans')
+    daily_dfall_trans.to_excel(writer, sheet_name='daily_trans')
+    hourly_dfall_trans.to_excel(writer, sheet_name='hourly_trans')
+    hourlyCS_df_trans.to_excel(writer, sheet_name='busy_hourCS_trans')
+    hourlyPS_df_trans.to_excel(writer, sheet_name='busy_hourPS_trans')
 
+''' переходим к работе с эксель файлом - форматирование строк и добавление графиков
+    используем модуль openpyxl'''
+
+my_file = openpyxl.load_workbook(f"{directory}{csv_name1}{output_comment}.xlsx")
+
+weekly_sheet = my_file["weekly"]
+daily_sheet = my_file["daily"]
+hourly_sheet = my_file["hourly"]
+busy_hourCS_sheet = my_file["busy_hourCS"]
+busy_hourPS_sheet = my_file["busy_hourPS"]
+weekly_sheet_trans = my_file["weekly_trans"]
+daily_sheet_trans = my_file["daily_trans"]
+hourly_sheet_trans = my_file["hourly_trans"]
+busy_hourCS_sheet_trans = my_file["busy_hourCS_trans"]
+busy_hourPS_sheet_trans = my_file["busy_hourPS_trans"]
+
+weekly_sheet.column_dimensions["A"].width = 2
+weekly_sheet.column_dimensions["B"].width = 7
+daily_sheet.column_dimensions["A"].width = 2
+daily_sheet.column_dimensions["B"].width = 11
+hourly_sheet.column_dimensions["A"].width = 4
+busy_hourCS_sheet.column_dimensions["A"].width = 11
+busy_hourCS_sheet.column_dimensions["B"].width = 11
+busy_hourPS_sheet.column_dimensions["A"].width = 11
+busy_hourPS_sheet.column_dimensions["B"].width = 11
+
+weekly_sheet_trans.column_dimensions["A"].width = 35
+daily_sheet_trans.column_dimensions["A"].width = 35
+hourly_sheet_trans.column_dimensions["A"].width = 35
+busy_hourCS_sheet_trans.column_dimensions["A"].width = 35
+busy_hourPS_sheet_trans.column_dimensions["A"].width = 35
+
+hourly_sheet.delete_cols(1) # удаляем первые столбцы чтобы номера столбцов для всех KPI были одинаковыми как в дневной статистике
+busy_hourCS_sheet.delete_cols(1) # удаляем первые столбцы чтобы номера столбцов для всех KPI были одинаковыми как в дневной статистике
+busy_hourPS_sheet.delete_cols(1) # удаляем первые столбцы чтобы номера столбцов для всех KPI были одинаковыми как в дневной статистике
+
+# определение количества строк в таблицах
+last_row_weekly = weekly_sheet.max_row
+last_row_daily = daily_sheet.max_row
+last_row_hourly = hourly_sheet.max_row
+last_row_BHCS = busy_hourCS_sheet.max_row
+last_row_BHPS = busy_hourPS_sheet.max_row
+
+# выставление правильного формата для столбцов с датами
+for r in range(2,(last_row_daily+1)):
+    daily_sheet[f'B{r}'].number_format ='DD.MM.YYYY'
+for r in range(2, (last_row_hourly+1)):
+    hourly_sheet[f'A{r}'].number_format ='DD'
+for r in range(2,(last_row_BHCS+1)):
+    busy_hourCS_sheet[f'A{r}'].number_format ='DD.MM.YYYY'
+for r in range(2,(last_row_BHPS+1)):
+    busy_hourPS_sheet[f'A{r}'].number_format = 'DD.MM.YYYY'
+
+for cell in daily_sheet_trans[2]:
+    cell.number_format ='DD.MM.YYYY'
+
+#row = daily_sheet_trans[2]
+#row_dimension = row[0].row_dimension
+#row_dimension.width = 20
+
+
+# выставление переноса строк для названий KPI
+for cell in weekly_sheet[1]:
+    cell.alignment = openpyxl.styles.Alignment(wrap_text=True)
+for cell in daily_sheet[1]:
+    cell.alignment = openpyxl.styles.Alignment(wrap_text=True)
+for cell in hourly_sheet[1]:
+    cell.alignment = openpyxl.styles.Alignment(wrap_text=True)
+for cell in busy_hourCS_sheet[1]:
+    cell.alignment = openpyxl.styles.Alignment(wrap_text=True)
+for cell in busy_hourPS_sheet[1]:
+    cell.alignment = openpyxl.styles.Alignment(wrap_text=True)
+
+#  графики в недельной таблице weekly_sheet
+x_values = Reference(weekly_sheet, range_string=(f"weekly!$B$2:$B${last_row_weekly}"))
+
+CStraffic3GErl= Reference(weekly_sheet, min_col=3, min_row=1, max_row=last_row_weekly)
+PStraffic3GULDLGB= Reference(weekly_sheet, min_col=4, min_row=1, max_row=last_row_weekly)
+CSRABDropRate= Reference(weekly_sheet, min_col=5, min_row=1, max_row=last_row_weekly)
+PSBlockingRate= Reference(weekly_sheet, min_col=6, min_row=1, max_row=last_row_weekly)
+PSRABDropRate= Reference(weekly_sheet, min_col=7, min_row=1, max_row=last_row_weekly)
+PSHSDropRate= Reference(weekly_sheet, min_col=8, min_row=1, max_row=last_row_weekly)
+HSDPAThroughputkbps= Reference(weekly_sheet, min_col=9, min_row=1, max_row=last_row_weekly)
+HSUPAThroughputkbps= Reference(weekly_sheet, min_col=10, min_row=1, max_row=last_row_weekly)
+SoftHandoverSuccessrate= Reference(weekly_sheet, min_col=11, min_row=1, max_row=last_row_weekly)
+HardHandoverSuccessrate= Reference(weekly_sheet, min_col=12, min_row=1, max_row=last_row_weekly)
+CSW2GInterRATHandoverOutSR= Reference(weekly_sheet, min_col=13, min_row=1, max_row=last_row_weekly)
+RRCAssignmentSucessRateCSBH= Reference(weekly_sheet, min_col=14, min_row=1, max_row=last_row_weekly)
+RRCAssignmentSucessRatePSBH= Reference(weekly_sheet, min_col=15, min_row=1, max_row=last_row_weekly)
+RRCDropRateCSBH= Reference(weekly_sheet, min_col=16, min_row=1, max_row=last_row_weekly)
+RRCDropRatePSBH= Reference(weekly_sheet, min_col=17, min_row=1, max_row=last_row_weekly)
+RABAssignmentSuccessRateCS= Reference(weekly_sheet, min_col=18, min_row=1, max_row=last_row_weekly)
+RABAssignmentSuccessRatePS= Reference(weekly_sheet, min_col=19, min_row=1, max_row=last_row_weekly)
+CCSR3G= Reference(weekly_sheet, min_col=20, min_row=1, max_row=last_row_weekly)
+DCSR3G= Reference(weekly_sheet, min_col=21, min_row=1, max_row=last_row_weekly)
+
+CStraffic_chart = LineChart()
+CStraffic_chart.width = 40
+CStraffic_chart.height = 10
+CStraffic_chart.add_data(CStraffic3GErl, titles_from_data = True)  #
+CStraffic_chart.set_categories(x_values)
+CStraffic_chart.legend.position = 'b'
+weekly_sheet.add_chart(CStraffic_chart, "A18")
+
+PStraffic_chart = LineChart()
+PStraffic_chart.width = 40
+PStraffic_chart.height = 10
+PStraffic_chart.add_data(PStraffic3GULDLGB, titles_from_data = True)  #
+PStraffic_chart.set_categories(x_values)
+PStraffic_chart.legend.position = 'b'
+weekly_sheet.add_chart(PStraffic_chart, "A38")
+
+CSdrop_chart = LineChart()
+CSdrop_chart.width = 40
+CSdrop_chart.height = 10
+CSdrop_chart.add_data(CSRABDropRate, titles_from_data = True)  #
+CSdrop_chart.set_categories(x_values)
+CSdrop_chart.legend.position = 'b'
+weekly_sheet.add_chart(CSdrop_chart, "A58")
+
+PSdrop_chart = LineChart()
+PSdrop_chart.width = 40
+PSdrop_chart.height = 10
+PSdrop_chart.add_data(PSRABDropRate, titles_from_data = True)  #
+PSdrop_chart.set_categories(x_values)
+PSdrop_chart.legend.position = 'b'
+weekly_sheet.add_chart(PSdrop_chart, "A78")
+
+RRCdrop_chart = LineChart()
+RRCdrop_chart.width = 40
+RRCdrop_chart.height = 10
+RRCdrop_chart.add_data(RRCDropRateCSBH, titles_from_data = True)  #
+RRCdrop_chart.set_categories(x_values)
+RRCdrop_chart.legend.position = 'b'
+weekly_sheet.add_chart(RRCdrop_chart, "A98")
+
+HSDPAThroughput_chart = LineChart()
+HSDPAThroughput_chart.width = 40
+HSDPAThroughput_chart.height = 10
+HSDPAThroughput_chart.add_data(HSDPAThroughputkbps, titles_from_data = True)  #
+HSDPAThroughput_chart.set_categories(x_values)
+HSDPAThroughput_chart.legend.position = 'b'
+weekly_sheet.add_chart(HSDPAThroughput_chart, "A118")
+
+HSUPAThroughput_chart = LineChart()
+HSUPAThroughput_chart.width = 40
+HSUPAThroughput_chart.height = 10
+HSUPAThroughput_chart.add_data(HSUPAThroughputkbps, titles_from_data = True)  #
+HSUPAThroughput_chart.set_categories(x_values)
+HSUPAThroughput_chart.legend.position = 'b'
+weekly_sheet.add_chart(HSUPAThroughput_chart, "A138")
+
+Handover_chart = LineChart()
+Handover_chart.width = 40
+Handover_chart.height = 10
+Handover_chart.add_data(SoftHandoverSuccessrate, titles_from_data = True)  #
+Handover_chart.add_data(HardHandoverSuccessrate, titles_from_data = True)  #
+Handover_chart.add_data(CSW2GInterRATHandoverOutSR, titles_from_data = True)  #
+Handover_chart.set_categories(x_values)
+Handover_chart.legend.position = 'b'
+weekly_sheet.add_chart(Handover_chart, "A158")
+
+RRCassign_chart = LineChart()
+RRCassign_chart.width = 40
+RRCassign_chart.height = 10
+RRCassign_chart.add_data(RRCAssignmentSucessRateCSBH, titles_from_data = True)  #
+RRCassign_chart.set_categories(x_values)
+RRCassign_chart.legend.position = 'b'
+weekly_sheet.add_chart(RRCassign_chart, "A178")
+
+RABCSassign_chart = LineChart()
+RABCSassign_chart.width = 40
+RABCSassign_chart.height = 10
+RABCSassign_chart.add_data(RABAssignmentSuccessRateCS, titles_from_data = True)  #
+RABCSassign_chart.set_categories(x_values)
+RABCSassign_chart.legend.position = 'b'
+weekly_sheet.add_chart(RABCSassign_chart, "A198")
+
+RABPSassign_chart = LineChart()
+RABPSassign_chart.width = 40
+RABPSassign_chart.height = 10
+RABPSassign_chart.add_data(RABAssignmentSuccessRatePS, titles_from_data = True)  #
+RABPSassign_chart.set_categories(x_values)
+RABPSassign_chart.legend.position = 'b'
+weekly_sheet.add_chart(RABPSassign_chart, "A218")
+
+CCSR3G_chart = LineChart()
+CCSR3G_chart.width = 40
+CCSR3G_chart.height = 10
+CCSR3G_chart.add_data(CCSR3G, titles_from_data = True)  #
+CCSR3G_chart.set_categories(x_values)
+CCSR3G_chart.legend.position = 'b'
+weekly_sheet.add_chart(CCSR3G_chart, "A238")
+
+DCSR3G_chart = LineChart()
+DCSR3G_chart.width = 40
+DCSR3G_chart.height = 10
+DCSR3G_chart.add_data(DCSR3G, titles_from_data = True)  #
+DCSR3G_chart.set_categories(x_values)
+DCSR3G_chart.legend.position = 'b'
+weekly_sheet.add_chart(DCSR3G_chart, "A258")
+
+#  графики в суточной таблице daily_sheet   last_row_daily
+x_values = Reference(daily_sheet, range_string=(f"daily!$B$2:$B${last_row_daily}"))
+
+CStraffic3GErl= Reference(daily_sheet, min_col=3, min_row=1, max_row=last_row_daily)
+PStraffic3GULDLGB= Reference(daily_sheet, min_col=4, min_row=1, max_row=last_row_daily)
+CSRABDropRate= Reference(daily_sheet, min_col=5, min_row=1, max_row=last_row_daily)
+PSBlockingRate= Reference(daily_sheet, min_col=6, min_row=1, max_row=last_row_daily)
+PSRABDropRate= Reference(daily_sheet, min_col=7, min_row=1, max_row=last_row_daily)
+PSHSDropRate= Reference(daily_sheet, min_col=8, min_row=1, max_row=last_row_daily)
+HSDPAThroughputkbps= Reference(daily_sheet, min_col=9, min_row=1, max_row=last_row_daily)
+HSUPAThroughputkbps= Reference(daily_sheet, min_col=10, min_row=1, max_row=last_row_daily)
+SoftHandoverSuccessrate= Reference(daily_sheet, min_col=11, min_row=1, max_row=last_row_daily)
+HardHandoverSuccessrate= Reference(daily_sheet, min_col=12, min_row=1, max_row=last_row_daily)
+CSW2GInterRATHandoverOutSR= Reference(daily_sheet, min_col=13, min_row=1, max_row=last_row_daily)
+RRCAssignmentSucessRateCSBH= Reference(daily_sheet, min_col=14, min_row=1, max_row=last_row_daily)
+RRCAssignmentSucessRatePSBH= Reference(daily_sheet, min_col=15, min_row=1, max_row=last_row_daily)
+RRCDropRateCSBH= Reference(daily_sheet, min_col=16, min_row=1, max_row=last_row_daily)
+RRCDropRatePSBH= Reference(daily_sheet, min_col=17, min_row=1, max_row=last_row_daily)
+RABAssignmentSuccessRateCS= Reference(daily_sheet, min_col=18, min_row=1, max_row=last_row_daily)
+RABAssignmentSuccessRatePS= Reference(daily_sheet, min_col=19, min_row=1, max_row=last_row_daily)
+CCSR3G= Reference(daily_sheet, min_col=20, min_row=1, max_row=last_row_daily)
+DCSR3G= Reference(daily_sheet, min_col=21, min_row=1, max_row=last_row_daily)
+CStraffic3GErlU2100= Reference(daily_sheet, min_col=22, min_row=1, max_row=last_row_daily)
+PStraffic3GULDLGBU2100= Reference(daily_sheet, min_col=23, min_row=1, max_row=last_row_daily)
+CSRABDropRateU2100= Reference(daily_sheet, min_col=24, min_row=1, max_row=last_row_daily)
+PSBlockingRateU2100= Reference(daily_sheet, min_col=25, min_row=1, max_row=last_row_daily)
+PSRABDropRateU2100= Reference(daily_sheet, min_col=26, min_row=1, max_row=last_row_daily)
+PSHSDropRateU2100= Reference(daily_sheet, min_col=27, min_row=1, max_row=last_row_daily)
+HSDPAThroughputkbpsU2100= Reference(daily_sheet, min_col=28, min_row=1, max_row=last_row_daily)
+HSUPAThroughputkbpsU2100= Reference(daily_sheet, min_col=29, min_row=1, max_row=last_row_daily)
+SoftHandoverSuccessrateU2100= Reference(daily_sheet, min_col=30, min_row=1, max_row=last_row_daily)
+HardHandoverSuccessrateU2100= Reference(daily_sheet, min_col=31, min_row=1, max_row=last_row_daily)
+CSW2GInterRATHandoverOutSRU2100= Reference(daily_sheet, min_col=32, min_row=1, max_row=last_row_daily)
+RRCAssignmentSucessRateCSBHU2100= Reference(daily_sheet, min_col=33, min_row=1, max_row=last_row_daily)
+RRCAssignmentSucessRatePSBHU2100= Reference(daily_sheet, min_col=34, min_row=1, max_row=last_row_daily)
+RRCDropRateCSBHU2100= Reference(daily_sheet, min_col=35, min_row=1, max_row=last_row_daily)
+RRCDropRatePSBHU2100= Reference(daily_sheet, min_col=36, min_row=1, max_row=last_row_daily)
+RABAssignmentSuccessRateCSU2100= Reference(daily_sheet, min_col=37, min_row=1, max_row=last_row_daily)
+RABAssignmentSuccessRatePSU2100= Reference(daily_sheet, min_col=38, min_row=1, max_row=last_row_daily)
+CCSR3GU2100= Reference(daily_sheet, min_col=39, min_row=1, max_row=last_row_daily)
+DCSR3GU2100= Reference(daily_sheet, min_col=40, min_row=1, max_row=last_row_daily)
+CStraffic3GErlU900= Reference(daily_sheet, min_col=41, min_row=1, max_row=last_row_daily)
+PStraffic3GULDLGBU900= Reference(daily_sheet, min_col=42, min_row=1, max_row=last_row_daily)
+CSRABDropRateU900= Reference(daily_sheet, min_col=43, min_row=1, max_row=last_row_daily)
+PSBlockingRateU900= Reference(daily_sheet, min_col=44, min_row=1, max_row=last_row_daily)
+PSRABDropRateU900= Reference(daily_sheet, min_col=45, min_row=1, max_row=last_row_daily)
+PSHSDropRateU900= Reference(daily_sheet, min_col=46, min_row=1, max_row=last_row_daily)
+HSDPAThroughputkbpsU900= Reference(daily_sheet, min_col=47, min_row=1, max_row=last_row_daily)
+HSUPAThroughputkbpsU900= Reference(daily_sheet, min_col=48, min_row=1, max_row=last_row_daily)
+SoftHandoverSuccessrateU900= Reference(daily_sheet, min_col=49, min_row=1, max_row=last_row_daily)
+HardHandoverSuccessrateU900= Reference(daily_sheet, min_col=50, min_row=1, max_row=last_row_daily)
+CSW2GInterRATHandoverOutSRU900= Reference(daily_sheet, min_col=51, min_row=1, max_row=last_row_daily)
+RRCAssignmentSucessRateCSBHU900= Reference(daily_sheet, min_col=52, min_row=1, max_row=last_row_daily)
+RRCAssignmentSucessRatePSBHU900= Reference(daily_sheet, min_col=53, min_row=1, max_row=last_row_daily)
+RRCDropRateCSBHU900= Reference(daily_sheet, min_col=54, min_row=1, max_row=last_row_daily)
+RRCDropRatePSBHU900= Reference(daily_sheet, min_col=55, min_row=1, max_row=last_row_daily)
+RABAssignmentSuccessRateCSU900= Reference(daily_sheet, min_col=56, min_row=1, max_row=last_row_daily)
+RABAssignmentSuccessRatePSU900= Reference(daily_sheet, min_col=57, min_row=1, max_row=last_row_daily)
+CCSR3GU900= Reference(daily_sheet, min_col=58, min_row=1, max_row=last_row_daily)
+DCSR3GU900= Reference(daily_sheet, min_col=59, min_row=1, max_row=last_row_daily)
+CStraffic3GErl10612= Reference(daily_sheet, min_col=60, min_row=1, max_row=last_row_daily)
+PStraffic3GULDLGB10612= Reference(daily_sheet, min_col=61, min_row=1, max_row=last_row_daily)
+CSRABDropRate10612= Reference(daily_sheet, min_col=62, min_row=1, max_row=last_row_daily)
+PSBlockingRate10612= Reference(daily_sheet, min_col=63, min_row=1, max_row=last_row_daily)
+PSRABDropRate10612= Reference(daily_sheet, min_col=64, min_row=1, max_row=last_row_daily)
+PSHSDropRate10612= Reference(daily_sheet, min_col=65, min_row=1, max_row=last_row_daily)
+HSDPAThroughputkbps10612= Reference(daily_sheet, min_col=66, min_row=1, max_row=last_row_daily)
+HSUPAThroughputkbps10612= Reference(daily_sheet, min_col=67, min_row=1, max_row=last_row_daily)
+SoftHandoverSuccessrate10612= Reference(daily_sheet, min_col=68, min_row=1, max_row=last_row_daily)
+HardHandoverSuccessrate10612= Reference(daily_sheet, min_col=69, min_row=1, max_row=last_row_daily)
+CSW2GInterRATHandoverOutSR10612= Reference(daily_sheet, min_col=70, min_row=1, max_row=last_row_daily)
+RRCAssignmentSucessRateCSBH10612= Reference(daily_sheet, min_col=71, min_row=1, max_row=last_row_daily)
+RRCAssignmentSucessRatePSBH10612= Reference(daily_sheet, min_col=72, min_row=1, max_row=last_row_daily)
+RRCDropRateCSBH10612= Reference(daily_sheet, min_col=73, min_row=1, max_row=last_row_daily)
+RRCDropRatePSBH10612= Reference(daily_sheet, min_col=74, min_row=1, max_row=last_row_daily)
+RABAssignmentSuccessRateCS10612= Reference(daily_sheet, min_col=75, min_row=1, max_row=last_row_daily)
+RABAssignmentSuccessRatePS10612= Reference(daily_sheet, min_col=76, min_row=1, max_row=last_row_daily)
+CCSR3G10612= Reference(daily_sheet, min_col=77, min_row=1, max_row=last_row_daily)
+DCSR3G10612= Reference(daily_sheet, min_col=78, min_row=1, max_row=last_row_daily)
+CStraffic3GErl10637= Reference(daily_sheet, min_col=79, min_row=1, max_row=last_row_daily)
+PStraffic3GULDLGB10637= Reference(daily_sheet, min_col=80, min_row=1, max_row=last_row_daily)
+CSRABDropRate10637= Reference(daily_sheet, min_col=81, min_row=1, max_row=last_row_daily)
+PSBlockingRate10637= Reference(daily_sheet, min_col=82, min_row=1, max_row=last_row_daily)
+PSRABDropRate10637= Reference(daily_sheet, min_col=83, min_row=1, max_row=last_row_daily)
+PSHSDropRate10637= Reference(daily_sheet, min_col=84, min_row=1, max_row=last_row_daily)
+HSDPAThroughputkbps10637= Reference(daily_sheet, min_col=85, min_row=1, max_row=last_row_daily)
+HSUPAThroughputkbps10637= Reference(daily_sheet, min_col=86, min_row=1, max_row=last_row_daily)
+SoftHandoverSuccessrate10637= Reference(daily_sheet, min_col=87, min_row=1, max_row=last_row_daily)
+HardHandoverSuccessrate10637= Reference(daily_sheet, min_col=88, min_row=1, max_row=last_row_daily)
+CSW2GInterRATHandoverOutSR10637= Reference(daily_sheet, min_col=89, min_row=1, max_row=last_row_daily)
+RRCAssignmentSucessRateCSBH10637= Reference(daily_sheet, min_col=90, min_row=1, max_row=last_row_daily)
+RRCAssignmentSucessRatePSBH10637= Reference(daily_sheet, min_col=91, min_row=1, max_row=last_row_daily)
+RRCDropRateCSBH10637= Reference(daily_sheet, min_col=92, min_row=1, max_row=last_row_daily)
+RRCDropRatePSBH10637= Reference(daily_sheet, min_col=93, min_row=1, max_row=last_row_daily)
+RABAssignmentSuccessRateCS10637= Reference(daily_sheet, min_col=94, min_row=1, max_row=last_row_daily)
+RABAssignmentSuccessRatePS10637= Reference(daily_sheet, min_col=95, min_row=1, max_row=last_row_daily)
+CCSR3G10637= Reference(daily_sheet, min_col=96, min_row=1, max_row=last_row_daily)
+DCSR3G10637= Reference(daily_sheet, min_col=97, min_row=1, max_row=last_row_daily)
+CStraffic3GErl2937= Reference(daily_sheet, min_col=98, min_row=1, max_row=last_row_daily)
+PStraffic3GULDLGB2937= Reference(daily_sheet, min_col=99, min_row=1, max_row=last_row_daily)
+CSRABDropRate2937= Reference(daily_sheet, min_col=100, min_row=1, max_row=last_row_daily)
+PSBlockingRate2937= Reference(daily_sheet, min_col=101, min_row=1, max_row=last_row_daily)
+PSRABDropRate2937= Reference(daily_sheet, min_col=102, min_row=1, max_row=last_row_daily)
+PSHSDropRate2937= Reference(daily_sheet, min_col=103, min_row=1, max_row=last_row_daily)
+HSDPAThroughputkbps2937= Reference(daily_sheet, min_col=104, min_row=1, max_row=last_row_daily)
+HSUPAThroughputkbps2937= Reference(daily_sheet, min_col=105, min_row=1, max_row=last_row_daily)
+SoftHandoverSuccessrate2937= Reference(daily_sheet, min_col=106, min_row=1, max_row=last_row_daily)
+HardHandoverSuccessrate2937= Reference(daily_sheet, min_col=107, min_row=1, max_row=last_row_daily)
+CSW2GInterRATHandoverOutSR2937= Reference(daily_sheet, min_col=108, min_row=1, max_row=last_row_daily)
+RRCAssignmentSucessRateCSBH2937= Reference(daily_sheet, min_col=109, min_row=1, max_row=last_row_daily)
+RRCAssignmentSucessRatePSBH2937= Reference(daily_sheet, min_col=110, min_row=1, max_row=last_row_daily)
+RRCDropRateCSBH2937= Reference(daily_sheet, min_col=111, min_row=1, max_row=last_row_daily)
+RRCDropRatePSBH2937= Reference(daily_sheet, min_col=112, min_row=1, max_row=last_row_daily)
+RABAssignmentSuccessRateCS2937= Reference(daily_sheet, min_col=113, min_row=1, max_row=last_row_daily)
+RABAssignmentSuccessRatePS2937= Reference(daily_sheet, min_col=114, min_row=1, max_row=last_row_daily)
+CCSR3G2937= Reference(daily_sheet, min_col=115, min_row=1, max_row=last_row_daily)
+DCSR3G2937= Reference(daily_sheet, min_col=116, min_row=1, max_row=last_row_daily)
+
+CStraffic_chart = LineChart()
+CStraffic_chart.width = 40
+CStraffic_chart.height = 10
+CStraffic_chart.add_data(CStraffic3GErl, titles_from_data = True)  #
+CStraffic_chart.add_data(CStraffic3GErlU2100, titles_from_data = True)
+CStraffic_chart.add_data(CStraffic3GErlU900, titles_from_data = True)
+CStraffic_chart.set_categories(x_values)
+CStraffic_chart.legend.position = 'b'
+daily_sheet.add_chart(CStraffic_chart, "A18")
+
+PStraffic_chart = LineChart()
+PStraffic_chart.width = 40
+PStraffic_chart.height = 10
+PStraffic_chart.add_data(PStraffic3GULDLGB, titles_from_data = True)  #
+PStraffic_chart.add_data(PStraffic3GULDLGBU2100, titles_from_data = True)
+PStraffic_chart.add_data(PStraffic3GULDLGBU900, titles_from_data = True)
+PStraffic_chart.set_categories(x_values)
+PStraffic_chart.legend.position = 'b'
+daily_sheet.add_chart(PStraffic_chart, "A38")
+
+CSdrop_chart = LineChart()
+CSdrop_chart.width = 40
+CSdrop_chart.height = 10
+CSdrop_chart.add_data(CSRABDropRate, titles_from_data = True)  #
+CSdrop_chart.add_data(CSRABDropRateU2100, titles_from_data = True)
+CSdrop_chart.add_data(CSRABDropRateU900, titles_from_data = True)
+CSdrop_chart.set_categories(x_values)
+CSdrop_chart.legend.position = 'b'
+daily_sheet.add_chart(CSdrop_chart, "A58")
+
+PSdrop_chart = LineChart()
+PSdrop_chart.width = 40
+PSdrop_chart.height = 10
+PSdrop_chart.add_data(PSRABDropRate, titles_from_data = True)  #
+PSdrop_chart.add_data(PSRABDropRateU2100, titles_from_data = True)
+PSdrop_chart.add_data(PSRABDropRateU900, titles_from_data = True)
+PSdrop_chart.set_categories(x_values)
+PSdrop_chart.legend.position = 'b'
+daily_sheet.add_chart(PSdrop_chart, "A78")
+
+RRCdrop_chart = LineChart()
+RRCdrop_chart.width = 40
+RRCdrop_chart.height = 10
+RRCdrop_chart.add_data(RRCDropRateCSBH, titles_from_data = True)  #
+RRCdrop_chart.add_data(RRCDropRateCSBHU2100, titles_from_data = True)
+RRCdrop_chart.add_data(RRCDropRateCSBHU900, titles_from_data = True)
+RRCdrop_chart.set_categories(x_values)
+RRCdrop_chart.legend.position = 'b'
+daily_sheet.add_chart(RRCdrop_chart, "A98")
+
+HSDPAThroughput_chart = LineChart()
+HSDPAThroughput_chart.width = 40
+HSDPAThroughput_chart.height = 10
+HSDPAThroughput_chart.add_data(HSDPAThroughputkbps, titles_from_data = True)  #
+HSDPAThroughput_chart.add_data(HSDPAThroughputkbpsU2100, titles_from_data = True)
+HSDPAThroughput_chart.add_data(HSDPAThroughputkbpsU900, titles_from_data = True)
+HSDPAThroughput_chart.set_categories(x_values)
+HSDPAThroughput_chart.legend.position = 'b'
+daily_sheet.add_chart(HSDPAThroughput_chart, "A118")
+
+HSUPAThroughput_chart = LineChart()
+HSUPAThroughput_chart.width = 40
+HSUPAThroughput_chart.height = 10
+HSUPAThroughput_chart.add_data(HSUPAThroughputkbps, titles_from_data = True)  #
+HSUPAThroughput_chart.add_data(HSUPAThroughputkbpsU2100, titles_from_data = True)
+HSUPAThroughput_chart.add_data(HSUPAThroughputkbpsU900, titles_from_data = True)
+HSUPAThroughput_chart.set_categories(x_values)
+HSUPAThroughput_chart.legend.position = 'b'
+daily_sheet.add_chart(HSUPAThroughput_chart, "A138")
+
+Handover_chart = LineChart()
+Handover_chart.width = 40
+Handover_chart.height = 10
+Handover_chart.add_data(SoftHandoverSuccessrate, titles_from_data = True)  #
+Handover_chart.add_data(SoftHandoverSuccessrateU2100, titles_from_data = True)
+Handover_chart.add_data(SoftHandoverSuccessrateU900, titles_from_data = True)
+Handover_chart.add_data(HardHandoverSuccessrate, titles_from_data = True)  #
+Handover_chart.add_data(HardHandoverSuccessrateU2100, titles_from_data = True)
+Handover_chart.add_data(HardHandoverSuccessrateU900, titles_from_data = True)
+Handover_chart.add_data(CSW2GInterRATHandoverOutSR, titles_from_data = True)  #
+Handover_chart.add_data(CSW2GInterRATHandoverOutSRU2100, titles_from_data = True)
+Handover_chart.add_data(CSW2GInterRATHandoverOutSRU900, titles_from_data = True)
+Handover_chart.set_categories(x_values)
+Handover_chart.legend.position = 'b'
+daily_sheet.add_chart(Handover_chart, "A158")
+
+RRCassign_chart = LineChart()
+RRCassign_chart.width = 40
+RRCassign_chart.height = 10
+RRCassign_chart.add_data(RRCAssignmentSucessRateCSBH, titles_from_data = True)  #
+RRCassign_chart.add_data(RRCAssignmentSucessRateCSBHU2100, titles_from_data = True)
+RRCassign_chart.add_data(RRCAssignmentSucessRateCSBHU900, titles_from_data = True)
+RRCassign_chart.set_categories(x_values)
+RRCassign_chart.legend.position = 'b'
+daily_sheet.add_chart(RRCassign_chart, "A178")
+
+RABCSassign_chart = LineChart()
+RABCSassign_chart.width = 40
+RABCSassign_chart.height = 10
+RABCSassign_chart.add_data(RABAssignmentSuccessRateCS, titles_from_data = True)  #
+RABCSassign_chart.add_data(RABAssignmentSuccessRateCSU2100, titles_from_data = True)
+RABCSassign_chart.add_data(RABAssignmentSuccessRateCSU900, titles_from_data = True)
+RABCSassign_chart.set_categories(x_values)
+RABCSassign_chart.legend.position = 'b'
+daily_sheet.add_chart(RABCSassign_chart, "A198")
+
+RABPSassign_chart = LineChart()
+RABPSassign_chart.width = 40
+RABPSassign_chart.height = 10
+RABPSassign_chart.add_data(RABAssignmentSuccessRatePS, titles_from_data = True)  #
+RABPSassign_chart.add_data(RABAssignmentSuccessRatePSU2100, titles_from_data = True)
+RABPSassign_chart.add_data(RABAssignmentSuccessRatePSU900, titles_from_data = True)
+RABPSassign_chart.set_categories(x_values)
+RABPSassign_chart.legend.position = 'b'
+daily_sheet.add_chart(RABPSassign_chart, "A218")
+
+CCSR3G_chart = LineChart()
+CCSR3G_chart.width = 40
+CCSR3G_chart.height = 10
+CCSR3G_chart.add_data(CCSR3G, titles_from_data = True)  #
+CCSR3G_chart.add_data(CCSR3GU2100, titles_from_data = True)
+CCSR3G_chart.add_data(CCSR3GU900, titles_from_data = True)
+CCSR3G_chart.set_categories(x_values)
+CCSR3G_chart.legend.position = 'b'
+daily_sheet.add_chart(CCSR3G_chart, "A238")
+
+DCSR3G_chart = LineChart()
+DCSR3G_chart.width = 40
+DCSR3G_chart.height = 10
+DCSR3G_chart.add_data(DCSR3G, titles_from_data = True)  #
+DCSR3G_chart.add_data(DCSR3GU2100, titles_from_data = True)
+DCSR3G_chart.add_data(DCSR3GU900, titles_from_data = True)
+DCSR3G_chart.set_categories(x_values)
+DCSR3G_chart.legend.position = 'b'
+daily_sheet.add_chart(DCSR3G_chart, "A258")
+
+# графики почасовые hourly_sheet  last_row_hourly
+x_values = Reference(hourly_sheet, range_string=(f"hourly!$A$2:$B${last_row_hourly}"))
+
+CStraffic3GErl= Reference(hourly_sheet, min_col=3, min_row=1, max_row=last_row_hourly)
+PStraffic3GULDLGB= Reference(hourly_sheet, min_col=4, min_row=1, max_row=last_row_hourly)
+CSRABDropRate= Reference(hourly_sheet, min_col=5, min_row=1, max_row=last_row_hourly)
+PSBlockingRate= Reference(hourly_sheet, min_col=6, min_row=1, max_row=last_row_hourly)
+PSRABDropRate= Reference(hourly_sheet, min_col=7, min_row=1, max_row=last_row_hourly)
+PSHSDropRate= Reference(hourly_sheet, min_col=8, min_row=1, max_row=last_row_hourly)
+HSDPAThroughputkbps= Reference(hourly_sheet, min_col=9, min_row=1, max_row=last_row_hourly)
+HSUPAThroughputkbps= Reference(hourly_sheet, min_col=10, min_row=1, max_row=last_row_hourly)
+SoftHandoverSuccessrate= Reference(hourly_sheet, min_col=11, min_row=1, max_row=last_row_hourly)
+HardHandoverSuccessrate= Reference(hourly_sheet, min_col=12, min_row=1, max_row=last_row_hourly)
+CSW2GInterRATHandoverOutSR= Reference(hourly_sheet, min_col=13, min_row=1, max_row=last_row_hourly)
+RRCAssignmentSucessRateCSBH= Reference(hourly_sheet, min_col=14, min_row=1, max_row=last_row_hourly)
+RRCAssignmentSucessRatePSBH= Reference(hourly_sheet, min_col=15, min_row=1, max_row=last_row_hourly)
+RRCDropRateCSBH= Reference(hourly_sheet, min_col=16, min_row=1, max_row=last_row_hourly)
+RRCDropRatePSBH= Reference(hourly_sheet, min_col=17, min_row=1, max_row=last_row_hourly)
+RABAssignmentSuccessRateCS= Reference(hourly_sheet, min_col=18, min_row=1, max_row=last_row_hourly)
+RABAssignmentSuccessRatePS= Reference(hourly_sheet, min_col=19, min_row=1, max_row=last_row_hourly)
+CCSR3G= Reference(hourly_sheet, min_col=20, min_row=1, max_row=last_row_hourly)
+DCSR3G= Reference(hourly_sheet, min_col=21, min_row=1, max_row=last_row_hourly)
+CStraffic3GErlU2100= Reference(hourly_sheet, min_col=22, min_row=1, max_row=last_row_hourly)
+PStraffic3GULDLGBU2100= Reference(hourly_sheet, min_col=23, min_row=1, max_row=last_row_hourly)
+CSRABDropRateU2100= Reference(hourly_sheet, min_col=24, min_row=1, max_row=last_row_hourly)
+PSBlockingRateU2100= Reference(hourly_sheet, min_col=25, min_row=1, max_row=last_row_hourly)
+PSRABDropRateU2100= Reference(hourly_sheet, min_col=26, min_row=1, max_row=last_row_hourly)
+PSHSDropRateU2100= Reference(hourly_sheet, min_col=27, min_row=1, max_row=last_row_hourly)
+HSDPAThroughputkbpsU2100= Reference(hourly_sheet, min_col=28, min_row=1, max_row=last_row_hourly)
+HSUPAThroughputkbpsU2100= Reference(hourly_sheet, min_col=29, min_row=1, max_row=last_row_hourly)
+SoftHandoverSuccessrateU2100= Reference(hourly_sheet, min_col=30, min_row=1, max_row=last_row_hourly)
+HardHandoverSuccessrateU2100= Reference(hourly_sheet, min_col=31, min_row=1, max_row=last_row_hourly)
+CSW2GInterRATHandoverOutSRU2100= Reference(hourly_sheet, min_col=32, min_row=1, max_row=last_row_hourly)
+RRCAssignmentSucessRateCSBHU2100= Reference(hourly_sheet, min_col=33, min_row=1, max_row=last_row_hourly)
+RRCAssignmentSucessRatePSBHU2100= Reference(hourly_sheet, min_col=34, min_row=1, max_row=last_row_hourly)
+RRCDropRateCSBHU2100= Reference(hourly_sheet, min_col=35, min_row=1, max_row=last_row_hourly)
+RRCDropRatePSBHU2100= Reference(hourly_sheet, min_col=36, min_row=1, max_row=last_row_hourly)
+RABAssignmentSuccessRateCSU2100= Reference(hourly_sheet, min_col=37, min_row=1, max_row=last_row_hourly)
+RABAssignmentSuccessRatePSU2100= Reference(hourly_sheet, min_col=38, min_row=1, max_row=last_row_hourly)
+CCSR3GU2100= Reference(hourly_sheet, min_col=39, min_row=1, max_row=last_row_hourly)
+DCSR3GU2100= Reference(hourly_sheet, min_col=40, min_row=1, max_row=last_row_hourly)
+CStraffic3GErlU900= Reference(hourly_sheet, min_col=41, min_row=1, max_row=last_row_hourly)
+PStraffic3GULDLGBU900= Reference(hourly_sheet, min_col=42, min_row=1, max_row=last_row_hourly)
+CSRABDropRateU900= Reference(hourly_sheet, min_col=43, min_row=1, max_row=last_row_hourly)
+PSBlockingRateU900= Reference(hourly_sheet, min_col=44, min_row=1, max_row=last_row_hourly)
+PSRABDropRateU900= Reference(hourly_sheet, min_col=45, min_row=1, max_row=last_row_hourly)
+PSHSDropRateU900= Reference(hourly_sheet, min_col=46, min_row=1, max_row=last_row_hourly)
+HSDPAThroughputkbpsU900= Reference(hourly_sheet, min_col=47, min_row=1, max_row=last_row_hourly)
+HSUPAThroughputkbpsU900= Reference(hourly_sheet, min_col=48, min_row=1, max_row=last_row_hourly)
+SoftHandoverSuccessrateU900= Reference(hourly_sheet, min_col=49, min_row=1, max_row=last_row_hourly)
+HardHandoverSuccessrateU900= Reference(hourly_sheet, min_col=50, min_row=1, max_row=last_row_hourly)
+CSW2GInterRATHandoverOutSRU900= Reference(hourly_sheet, min_col=51, min_row=1, max_row=last_row_hourly)
+RRCAssignmentSucessRateCSBHU900= Reference(hourly_sheet, min_col=52, min_row=1, max_row=last_row_hourly)
+RRCAssignmentSucessRatePSBHU900= Reference(hourly_sheet, min_col=53, min_row=1, max_row=last_row_hourly)
+RRCDropRateCSBHU900= Reference(hourly_sheet, min_col=54, min_row=1, max_row=last_row_hourly)
+RRCDropRatePSBHU900= Reference(hourly_sheet, min_col=55, min_row=1, max_row=last_row_hourly)
+RABAssignmentSuccessRateCSU900= Reference(hourly_sheet, min_col=56, min_row=1, max_row=last_row_hourly)
+RABAssignmentSuccessRatePSU900= Reference(hourly_sheet, min_col=57, min_row=1, max_row=last_row_hourly)
+CCSR3GU900= Reference(hourly_sheet, min_col=58, min_row=1, max_row=last_row_hourly)
+DCSR3GU900= Reference(hourly_sheet, min_col=59, min_row=1, max_row=last_row_hourly)
+CStraffic3GErl10612= Reference(hourly_sheet, min_col=60, min_row=1, max_row=last_row_hourly)
+PStraffic3GULDLGB10612= Reference(hourly_sheet, min_col=61, min_row=1, max_row=last_row_hourly)
+CSRABDropRate10612= Reference(hourly_sheet, min_col=62, min_row=1, max_row=last_row_hourly)
+PSBlockingRate10612= Reference(hourly_sheet, min_col=63, min_row=1, max_row=last_row_hourly)
+PSRABDropRate10612= Reference(hourly_sheet, min_col=64, min_row=1, max_row=last_row_hourly)
+PSHSDropRate10612= Reference(hourly_sheet, min_col=65, min_row=1, max_row=last_row_hourly)
+HSDPAThroughputkbps10612= Reference(hourly_sheet, min_col=66, min_row=1, max_row=last_row_hourly)
+HSUPAThroughputkbps10612= Reference(hourly_sheet, min_col=67, min_row=1, max_row=last_row_hourly)
+SoftHandoverSuccessrate10612= Reference(hourly_sheet, min_col=68, min_row=1, max_row=last_row_hourly)
+HardHandoverSuccessrate10612= Reference(hourly_sheet, min_col=69, min_row=1, max_row=last_row_hourly)
+CSW2GInterRATHandoverOutSR10612= Reference(hourly_sheet, min_col=70, min_row=1, max_row=last_row_hourly)
+RRCAssignmentSucessRateCSBH10612= Reference(hourly_sheet, min_col=71, min_row=1, max_row=last_row_hourly)
+RRCAssignmentSucessRatePSBH10612= Reference(hourly_sheet, min_col=72, min_row=1, max_row=last_row_hourly)
+RRCDropRateCSBH10612= Reference(hourly_sheet, min_col=73, min_row=1, max_row=last_row_hourly)
+RRCDropRatePSBH10612= Reference(hourly_sheet, min_col=74, min_row=1, max_row=last_row_hourly)
+RABAssignmentSuccessRateCS10612= Reference(hourly_sheet, min_col=75, min_row=1, max_row=last_row_hourly)
+RABAssignmentSuccessRatePS10612= Reference(hourly_sheet, min_col=76, min_row=1, max_row=last_row_hourly)
+CCSR3G10612= Reference(hourly_sheet, min_col=77, min_row=1, max_row=last_row_hourly)
+DCSR3G10612= Reference(hourly_sheet, min_col=78, min_row=1, max_row=last_row_hourly)
+CStraffic3GErl10637= Reference(hourly_sheet, min_col=79, min_row=1, max_row=last_row_hourly)
+PStraffic3GULDLGB10637= Reference(hourly_sheet, min_col=80, min_row=1, max_row=last_row_hourly)
+CSRABDropRate10637= Reference(hourly_sheet, min_col=81, min_row=1, max_row=last_row_hourly)
+PSBlockingRate10637= Reference(hourly_sheet, min_col=82, min_row=1, max_row=last_row_hourly)
+PSRABDropRate10637= Reference(hourly_sheet, min_col=83, min_row=1, max_row=last_row_hourly)
+PSHSDropRate10637= Reference(hourly_sheet, min_col=84, min_row=1, max_row=last_row_hourly)
+HSDPAThroughputkbps10637= Reference(hourly_sheet, min_col=85, min_row=1, max_row=last_row_hourly)
+HSUPAThroughputkbps10637= Reference(hourly_sheet, min_col=86, min_row=1, max_row=last_row_hourly)
+SoftHandoverSuccessrate10637= Reference(hourly_sheet, min_col=87, min_row=1, max_row=last_row_hourly)
+HardHandoverSuccessrate10637= Reference(hourly_sheet, min_col=88, min_row=1, max_row=last_row_hourly)
+CSW2GInterRATHandoverOutSR10637= Reference(hourly_sheet, min_col=89, min_row=1, max_row=last_row_hourly)
+RRCAssignmentSucessRateCSBH10637= Reference(hourly_sheet, min_col=90, min_row=1, max_row=last_row_hourly)
+RRCAssignmentSucessRatePSBH10637= Reference(hourly_sheet, min_col=91, min_row=1, max_row=last_row_hourly)
+RRCDropRateCSBH10637= Reference(hourly_sheet, min_col=92, min_row=1, max_row=last_row_hourly)
+RRCDropRatePSBH10637= Reference(hourly_sheet, min_col=93, min_row=1, max_row=last_row_hourly)
+RABAssignmentSuccessRateCS10637= Reference(hourly_sheet, min_col=94, min_row=1, max_row=last_row_hourly)
+RABAssignmentSuccessRatePS10637= Reference(hourly_sheet, min_col=95, min_row=1, max_row=last_row_hourly)
+CCSR3G10637= Reference(hourly_sheet, min_col=96, min_row=1, max_row=last_row_hourly)
+DCSR3G10637= Reference(hourly_sheet, min_col=97, min_row=1, max_row=last_row_hourly)
+CStraffic3GErl2937= Reference(hourly_sheet, min_col=98, min_row=1, max_row=last_row_hourly)
+PStraffic3GULDLGB2937= Reference(hourly_sheet, min_col=99, min_row=1, max_row=last_row_hourly)
+CSRABDropRate2937= Reference(hourly_sheet, min_col=100, min_row=1, max_row=last_row_hourly)
+PSBlockingRate2937= Reference(hourly_sheet, min_col=101, min_row=1, max_row=last_row_hourly)
+PSRABDropRate2937= Reference(hourly_sheet, min_col=102, min_row=1, max_row=last_row_hourly)
+PSHSDropRate2937= Reference(hourly_sheet, min_col=103, min_row=1, max_row=last_row_hourly)
+HSDPAThroughputkbps2937= Reference(hourly_sheet, min_col=104, min_row=1, max_row=last_row_hourly)
+HSUPAThroughputkbps2937= Reference(hourly_sheet, min_col=105, min_row=1, max_row=last_row_hourly)
+SoftHandoverSuccessrate2937= Reference(hourly_sheet, min_col=106, min_row=1, max_row=last_row_hourly)
+HardHandoverSuccessrate2937= Reference(hourly_sheet, min_col=107, min_row=1, max_row=last_row_hourly)
+CSW2GInterRATHandoverOutSR2937= Reference(hourly_sheet, min_col=108, min_row=1, max_row=last_row_hourly)
+RRCAssignmentSucessRateCSBH2937= Reference(hourly_sheet, min_col=109, min_row=1, max_row=last_row_hourly)
+RRCAssignmentSucessRatePSBH2937= Reference(hourly_sheet, min_col=110, min_row=1, max_row=last_row_hourly)
+RRCDropRateCSBH2937= Reference(hourly_sheet, min_col=111, min_row=1, max_row=last_row_hourly)
+RRCDropRatePSBH2937= Reference(hourly_sheet, min_col=112, min_row=1, max_row=last_row_hourly)
+RABAssignmentSuccessRateCS2937= Reference(hourly_sheet, min_col=113, min_row=1, max_row=last_row_hourly)
+RABAssignmentSuccessRatePS2937= Reference(hourly_sheet, min_col=114, min_row=1, max_row=last_row_hourly)
+CCSR3G2937= Reference(hourly_sheet, min_col=115, min_row=1, max_row=last_row_hourly)
+DCSR3G2937= Reference(hourly_sheet, min_col=116, min_row=1, max_row=last_row_hourly)
+
+CStraffic_chart = LineChart()
+CStraffic_chart.width = 40
+CStraffic_chart.height = 10
+CStraffic_chart.add_data(CStraffic3GErl, titles_from_data = True)  #
+CStraffic_chart.add_data(CStraffic3GErlU2100, titles_from_data = True)
+CStraffic_chart.add_data(CStraffic3GErlU900, titles_from_data = True)
+CStraffic_chart.set_categories(x_values)
+CStraffic_chart.legend.position = 'b'
+hourly_sheet.add_chart(CStraffic_chart, "A18")
+
+PStraffic_chart = LineChart()
+PStraffic_chart.width = 40
+PStraffic_chart.height = 10
+PStraffic_chart.add_data(PStraffic3GULDLGB, titles_from_data = True)  #
+PStraffic_chart.add_data(PStraffic3GULDLGBU2100, titles_from_data = True)
+PStraffic_chart.add_data(PStraffic3GULDLGBU900, titles_from_data = True)
+PStraffic_chart.set_categories(x_values)
+PStraffic_chart.legend.position = 'b'
+hourly_sheet.add_chart(PStraffic_chart, "A38")
+
+CSdrop_chart = LineChart()
+CSdrop_chart.width = 40
+CSdrop_chart.height = 10
+CSdrop_chart.add_data(CSRABDropRate, titles_from_data = True)  #
+CSdrop_chart.add_data(CSRABDropRateU2100, titles_from_data = True)
+CSdrop_chart.add_data(CSRABDropRateU900, titles_from_data = True)
+CSdrop_chart.set_categories(x_values)
+CSdrop_chart.legend.position = 'b'
+hourly_sheet.add_chart(CSdrop_chart, "A58")
+
+PSdrop_chart = LineChart()
+PSdrop_chart.width = 40
+PSdrop_chart.height = 10
+PSdrop_chart.add_data(PSRABDropRate, titles_from_data = True)  #
+PSdrop_chart.add_data(PSRABDropRateU2100, titles_from_data = True)
+PSdrop_chart.add_data(PSRABDropRateU900, titles_from_data = True)
+PSdrop_chart.set_categories(x_values)
+PSdrop_chart.legend.position = 'b'
+hourly_sheet.add_chart(PSdrop_chart, "A78")
+
+RRCdrop_chart = LineChart()
+RRCdrop_chart.width = 40
+RRCdrop_chart.height = 10
+RRCdrop_chart.add_data(RRCDropRateCSBH, titles_from_data = True)  #
+RRCdrop_chart.add_data(RRCDropRateCSBHU2100, titles_from_data = True)
+RRCdrop_chart.add_data(RRCDropRateCSBHU900, titles_from_data = True)
+RRCdrop_chart.set_categories(x_values)
+RRCdrop_chart.legend.position = 'b'
+hourly_sheet.add_chart(RRCdrop_chart, "A98")
+
+HSDPAThroughput_chart = LineChart()
+HSDPAThroughput_chart.width = 40
+HSDPAThroughput_chart.height = 10
+HSDPAThroughput_chart.add_data(HSDPAThroughputkbps, titles_from_data = True)  #
+HSDPAThroughput_chart.add_data(HSDPAThroughputkbpsU2100, titles_from_data = True)
+HSDPAThroughput_chart.add_data(HSDPAThroughputkbpsU900, titles_from_data = True)
+HSDPAThroughput_chart.set_categories(x_values)
+HSDPAThroughput_chart.legend.position = 'b'
+hourly_sheet.add_chart(HSDPAThroughput_chart, "A118")
+
+HSUPAThroughput_chart = LineChart()
+HSUPAThroughput_chart.width = 40
+HSUPAThroughput_chart.height = 10
+HSUPAThroughput_chart.add_data(HSUPAThroughputkbps, titles_from_data = True)  #
+HSUPAThroughput_chart.add_data(HSUPAThroughputkbpsU2100, titles_from_data = True)
+HSUPAThroughput_chart.add_data(HSUPAThroughputkbpsU900, titles_from_data = True)
+HSUPAThroughput_chart.set_categories(x_values)
+HSUPAThroughput_chart.legend.position = 'b'
+hourly_sheet.add_chart(HSUPAThroughput_chart, "A138")
+
+Handover_chart = LineChart()
+Handover_chart.width = 40
+Handover_chart.height = 10
+Handover_chart.add_data(SoftHandoverSuccessrate, titles_from_data = True)  #
+Handover_chart.add_data(SoftHandoverSuccessrateU2100, titles_from_data = True)
+Handover_chart.add_data(SoftHandoverSuccessrateU900, titles_from_data = True)
+Handover_chart.add_data(HardHandoverSuccessrate, titles_from_data = True)  #
+Handover_chart.add_data(HardHandoverSuccessrateU2100, titles_from_data = True)
+Handover_chart.add_data(HardHandoverSuccessrateU900, titles_from_data = True)
+Handover_chart.add_data(CSW2GInterRATHandoverOutSR, titles_from_data = True)  #
+Handover_chart.add_data(CSW2GInterRATHandoverOutSRU2100, titles_from_data = True)
+Handover_chart.add_data(CSW2GInterRATHandoverOutSRU900, titles_from_data = True)
+Handover_chart.set_categories(x_values)
+Handover_chart.legend.position = 'b'
+hourly_sheet.add_chart(Handover_chart, "A158")
+
+RRCassign_chart = LineChart()
+RRCassign_chart.width = 40
+RRCassign_chart.height = 10
+RRCassign_chart.add_data(RRCAssignmentSucessRateCSBH, titles_from_data = True)  #
+RRCassign_chart.add_data(RRCAssignmentSucessRateCSBHU2100, titles_from_data = True)
+RRCassign_chart.add_data(RRCAssignmentSucessRateCSBHU900, titles_from_data = True)
+RRCassign_chart.set_categories(x_values)
+RRCassign_chart.legend.position = 'b'
+hourly_sheet.add_chart(RRCassign_chart, "A178")
+
+RABCSassign_chart = LineChart()
+RABCSassign_chart.width = 40
+RABCSassign_chart.height = 10
+RABCSassign_chart.add_data(RABAssignmentSuccessRateCS, titles_from_data = True)  #
+RABCSassign_chart.add_data(RABAssignmentSuccessRateCSU2100, titles_from_data = True)
+RABCSassign_chart.add_data(RABAssignmentSuccessRateCSU900, titles_from_data = True)
+RABCSassign_chart.set_categories(x_values)
+RABCSassign_chart.legend.position = 'b'
+hourly_sheet.add_chart(RABCSassign_chart, "A198")
+
+RABPSassign_chart = LineChart()
+RABPSassign_chart.width = 40
+RABPSassign_chart.height = 10
+RABPSassign_chart.add_data(RABAssignmentSuccessRatePS, titles_from_data = True)  #
+RABPSassign_chart.add_data(RABAssignmentSuccessRatePSU2100, titles_from_data = True)
+RABPSassign_chart.add_data(RABAssignmentSuccessRatePSU900, titles_from_data = True)
+RABPSassign_chart.set_categories(x_values)
+RABPSassign_chart.legend.position = 'b'
+hourly_sheet.add_chart(RABPSassign_chart, "A218")
+
+CCSR3G_chart = LineChart()
+CCSR3G_chart.width = 40
+CCSR3G_chart.height = 10
+CCSR3G_chart.add_data(CCSR3G, titles_from_data = True)  #
+CCSR3G_chart.add_data(CCSR3GU2100, titles_from_data = True)
+CCSR3G_chart.add_data(CCSR3GU900, titles_from_data = True)
+CCSR3G_chart.set_categories(x_values)
+CCSR3G_chart.legend.position = 'b'
+hourly_sheet.add_chart(CCSR3G_chart, "A238")
+
+DCSR3G_chart = LineChart()
+DCSR3G_chart.width = 40
+DCSR3G_chart.height = 10
+DCSR3G_chart.add_data(DCSR3G, titles_from_data = True)  #
+DCSR3G_chart.add_data(DCSR3GU2100, titles_from_data = True)
+DCSR3G_chart.add_data(DCSR3GU900, titles_from_data = True)
+DCSR3G_chart.set_categories(x_values)
+DCSR3G_chart.legend.position = 'b'
+hourly_sheet.add_chart(DCSR3G_chart, "A258")
+
+
+my_file.save(f"{directory}{csv_name1}{output_comment}.xlsx")
 
 print('готово')
 frequency = 2500  # Set Frequency To 2500 Hertz
