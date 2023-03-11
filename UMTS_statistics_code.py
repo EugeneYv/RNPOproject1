@@ -9,8 +9,9 @@ import openpyxl.styles
 active_cell_number = 471  # количество активных сот !!!!
 
 directory = 'C:/work/Herson_audit/sts/3G/'
-csv_name1 = '3G_counters1(2023-03-09'
-csv_name2 = '3G_counters2(2023-03-09'
+csv_name1 = '3G_counters1(2023-03-11'
+csv_name2 = '3G_counters2(2023-03-11'
+NodeB_name = 'NodeB_thr(2023-03-11'
 output_comment = '_outputn'  # что добавится в конце к названию файла
 
 #sts1_df = pd.read_excel(f"{directory}{csv_name1}.xlsx", header=7, na_values='NIL')
@@ -23,6 +24,14 @@ sts1_df['week'] = sts1_df['date'].dt.isocalendar().week
 #sts2_df = pd.read_excel(f"{directory}{csv_name2}.xlsx", header=7, na_values='NIL')
 sts2_df = pd.read_csv(f"{directory}{csv_name2}.csv", sep=";", header=7, na_values='NIL')
 sts_df = pd.merge(sts1_df, sts2_df, how="left")
+
+# NodeB статистика
+stsN_df = pd.read_csv(f"{directory}{NodeB_name}.csv", sep=";", header=7, na_values='NIL')
+stsN_df['date'] = stsN_df['Start Time'].str.split(' ').str[0]
+stsN_df['hour'] = stsN_df['Start Time'].str.split(' ').str[1]
+stsN_df['date'] = pd.to_datetime(stsN_df['date'])
+stsN_df['week'] = stsN_df['date'].dt.isocalendar().week
+
 
 list_1 = ['RRC.AttConnEstab.EmgCall (None)','RRC.AttConnEstab.OrgConvCall (None)','RRC.AttConnEstab.TmConvCall (None)',\
           'RRC.SuccConnEstab.EmgCall (None)','RRC.SuccConnEstab.OrgConvCall (None)','RRC.SuccConnEstab.TmConvCall (None)',\
@@ -60,6 +69,13 @@ list_2 = ['CS traffic 3G, Erl','PS traffic 3G UL+DL, GB','CS RAB Drop Rate (%)',
           'HSDPA Throughput, kbps','HSUPA Throughput, kbps','Soft Handover Success rate, %','Hard Handover Success rate, %','CS W2G Inter-RAT Handover Out SR',\
           'RRC Assignment SucessRate (CS BH), %','RRC Assignment SucessRate (PS BH), %','RRC Drop Rate (CS BH), %','RRC Drop Rate (PS BH), %',\
           'RAB Assignment Success Rate (CS), %','RAB Assignment Success Rate (PS), %','CCSR CS,%','CCSR PS,%']  # список KPI
+list_1N = [ 'VS.HSDPA.DataOutput.Traffic (bit)', 'VS.HSDPA.DataTtiNum.User (None)', 'VS.DataOutput.AllHSDPA.Traffic (bit)', 'VS.AllHSDPA.DataTtiNum.User (None)', \
+            'VS.HSUPA.2msTTI.Traffic (kbit)', 'VS.HSUPA.10msTTI.Traffic (kbit)', 'VS.HSUPA.2msPDU.TTI.Num (None)', 'VS.HSUPA.10msPDU.TTI.Num (None)']
+list_2N =[
+'MeanThrHSDPA,kbps', \
+'MeanThrHSDPA DC,kbps', \
+'MeanThrHSUPA,kbps'
+]
 list_cluster_K = ['Label=UH0881_U94, CellID=48814, LogicRNCID=501', \
                         'Label=UH0881_U96, CellID=48816, LogicRNCID=501', \
                         'Label=UH0881_U95, CellID=48815, LogicRNCID=501', \
@@ -2046,6 +2062,832 @@ list_F3_2937 = [
 'Label=UH0748_U96, CellID=47486, LogicRNCID=501'
 ]  # кластер число активных сот 204
 
+list_U2100N = [
+'NodeB Function Name=UH3920, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3920, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3920, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1935, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1935, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1935, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1935, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1935, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1935, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3920, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0844, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0844, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0844, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0844, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0844, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0844, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0845, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0845, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0845, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0845, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0845, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0845, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1803, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1803, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1803, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1803, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1803, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1803, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0734, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0734, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0734, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0734, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0734, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0734, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0763, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0763, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0763, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0763, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0763, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0763, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0770, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0770, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0770, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0770, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0770, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0770, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1704, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1704, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1704, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1704, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1704, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1704, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1984, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1984, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1984, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1984, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3922, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3922, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3922, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3922, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0738, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0738, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0738, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0738, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0738, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0738, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0831, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0831, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0831, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0831, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0831, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0831, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0960, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0960, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0960, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0960, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0960, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0960, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0961, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0961, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0961, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0961, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0961, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0961, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0965, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0965, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0965, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0965, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0965, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0965, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1892, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1892, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1892, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1892, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1905, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1905, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1905, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1905, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1960, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1960, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1960, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1960, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1960, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1960, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2709, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2709, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2709, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2709, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2709, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2709, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2763, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2763, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2763, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2763, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2763, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2763, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1702, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1702, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1702, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1702, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1702, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1702, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3921, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3921, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3921, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3921, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3921, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3921, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1707, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1707, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1707, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1707, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1707, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1707, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0508, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0508, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0508, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0508, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0600, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0600, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0600, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0600, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0611, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0611, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0611, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0611, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0636, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0636, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0636, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0636, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0747, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0747, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0830, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0830, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0830, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0830, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0830, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0830, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0832, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0832, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0832, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0832, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0832, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0832, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0849, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0849, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0849, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0849, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0849, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0849, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0980, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0980, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0980, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0980, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0980, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0980, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0963, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0963, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0963, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0963, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0963, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0963, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0974, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0974, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0974, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0974, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0974, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0974, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1805, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1805, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1805, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1805, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1805, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1805, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1906, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1906, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1906, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1906, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1906, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1906, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1964, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1964, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1964, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1964, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2932, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2932, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2932, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2932, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2932, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2932, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2984, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2984, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2984, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2984, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2984, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2984, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3928, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3928, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3928, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3928, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3928, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3928, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3996, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3996, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3996, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3996, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3996, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3996, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0711, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0711, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0711, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0711, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0711, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0711, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0842, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0842, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0842, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0842, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0842, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0842, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1928, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1928, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1928, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1928, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1928, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1928, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0708, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0708, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0708, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0708, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0708, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0708, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0952, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0952, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0952, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0952, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0952, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0952, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0807, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0807, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0807, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0807, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0807, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0807, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0838, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0838, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0838, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0838, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0838, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0838, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0839, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0839, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0839, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0839, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0839, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0839, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0841, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0841, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0841, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0841, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0841, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0841, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1907, Local Cell ID=15, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1907, Local Cell ID=14, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1907, Local Cell ID=10, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1907, Local Cell ID=11, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1907, Local Cell ID=12, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1907, Local Cell ID=13, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1907, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1907, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1907, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1907, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1907, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1907, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0622, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0622, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0622, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0622, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0622, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0622, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0742, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0742, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0742, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0742, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0743, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0743, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0743, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0743, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0743, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0743, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0950, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0950, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0950, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0950, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0950, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0950, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0981, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0981, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0981, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0981, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0981, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0981, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0610, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0610, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0610, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0610, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0610, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0610, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0623, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0623, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0623, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0623, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0623, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0623, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1945, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1945, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1945, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1945, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1945, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1945, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0717, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0717, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0717, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0717, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0717, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0717, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2938, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2938, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2938, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2938, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2938, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2938, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0840, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0840, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0840, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0840, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0840, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0840, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0951, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0951, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0951, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0951, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0962, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0962, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0962, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0962, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0962, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0962, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0966, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0966, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0966, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0966, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0966, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0966, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0972, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0972, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0972, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0972, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0972, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0972, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1703, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1703, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1703, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1703, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1703, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1703, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1801, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1801, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1801, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1801, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0988, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0988, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0988, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0988, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0988, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0988, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1936, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1936, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1936, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1936, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1936, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1936, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1939, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1939, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1939, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1939, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1939, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1939, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0765, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0765, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0765, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0765, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0820, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0820, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0820, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0820, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0821, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0821, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0821, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0821, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0821, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0821, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0822, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0822, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0822, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0822, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0822, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0822, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0881, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0881, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0881, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0881, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0881, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0881, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0973, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0973, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0973, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0973, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0973, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0973, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0994, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0994, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0994, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0994, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0994, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0994, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1854, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1854, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1854, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1854, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1854, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1854, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1705, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1705, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1705, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1705, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1705, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1705, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1916, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1916, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1916, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1916, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1916, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1916, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3990, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3990, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3990, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3990, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3990, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3990, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0601, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0601, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0601, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0601, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0601, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0601, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0602, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0602, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0602, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0602, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0602, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0602, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0617, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0617, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0617, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0617, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0617, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0617, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0618, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0618, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0618, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0618, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0618, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0618, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0714, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0714, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0714, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0714, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0714, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0714, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0758, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0758, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0758, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0758, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0758, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0758, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1908, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1908, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1908, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1908, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1908, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1908, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1951, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1951, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1951, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1951, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1951, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1951, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1958, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1958, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1958, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1958, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1976, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1976, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1976, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1976, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1976, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1976, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3989, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3989, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3989, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3989, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3989, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3989, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3995, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3995, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3995, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3995, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3995, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH3995, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH4600, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH4600, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH4600, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH4600, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH4600, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH4600, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0748, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0748, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0748, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0748, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0748, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0748, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0880, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0880, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0880, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0880, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0880, Local Cell ID=1, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0880, Local Cell ID=0, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0879, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0879, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0879, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0879, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0766, Local Cell ID=6, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0766, Local Cell ID=5, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0766, Local Cell ID=4, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0766, Local Cell ID=3, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0766, Local Cell ID=2, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0766, Local Cell ID=1, Cell Name=CELLNAME']
+list_U900N = ['NodeB Function Name=UH0744, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0744, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0744, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0760, Local Cell ID=97, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0760, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0760, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0760, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0737, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0737, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0737, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0752, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0752, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0752, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0843, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0843, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0843, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0844, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0844, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0844, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0845, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0845, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0845, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1803, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1803, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1803, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0702, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0702, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0702, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0715, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0715, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0715, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0734, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0734, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0734, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0770, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0770, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0770, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0745, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0745, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0745, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0703, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0703, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0703, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0738, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0738, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0738, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0831, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0831, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0831, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0960, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0960, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0960, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0965, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0965, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0965, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2709, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2709, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH2709, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0600, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0600, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0611, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0611, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0611, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0614, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0614, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0614, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0636, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0636, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0636, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0736, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0736, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0736, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0732, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0732, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0732, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0739, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0739, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0740, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0740, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0740, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0747, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0747, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0750, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0750, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0750, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0761, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0761, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0830, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0830, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0830, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0832, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0832, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0832, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0849, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0849, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0849, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0963, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0963, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0963, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1805, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1805, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1805, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1925, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1925, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1925, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1964, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1964, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1964, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0746, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0746, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0711, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0711, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0711, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0731, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0731, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0731, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0735, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0735, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0735, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1928, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1928, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0708, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0708, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0708, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0807, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0807, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0807, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0838, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0838, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0838, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0839, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0839, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0839, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0841, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0841, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0841, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1907, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1907, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1907, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0622, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0622, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0622, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0869, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0869, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0869, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0646, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0646, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0646, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0742, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0742, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0742, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0743, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0743, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0751, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0751, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0756, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0756, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1902, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1902, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1902, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0623, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0623, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0623, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0713, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0713, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0713, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0717, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0717, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0717, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0833, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0833, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0833, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0840, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0840, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0840, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0951, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0951, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0962, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0962, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0962, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1801, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1801, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1804, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1804, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1804, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1936, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1936, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0765, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0765, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0820, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0820, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0820, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0821, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0821, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0821, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0822, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0822, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0822, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0881, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0881, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0881, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0973, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0973, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0973, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0601, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0601, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0601, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0602, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0602, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0602, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0618, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0618, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0618, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0714, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0714, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0758, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0758, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0758, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1913, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1913, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1913, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1951, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1951, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1951, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0748, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0748, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0748, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1945, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1945, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1945, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0763, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0763, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0763, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0881, Local Cell ID=97, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0821, Local Cell ID=99, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0821, Local Cell ID=98, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0821, Local Cell ID=97, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0820, Local Cell ID=99, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0820, Local Cell ID=98, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0820, Local Cell ID=97, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0761, Local Cell ID=97, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0869, Local Cell ID=97, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0965, Local Cell ID=97, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1945, Local Cell ID=99, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1945, Local Cell ID=98, Cell Name=CELLNAME', \
+'NodeB Function Name=UH1945, Local Cell ID=97, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0839, Local Cell ID=99, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0839, Local Cell ID=97, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0879, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0879, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0879, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0767, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0767, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0767, Local Cell ID=94, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0766, Local Cell ID=96, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0766, Local Cell ID=95, Cell Name=CELLNAME', \
+'NodeB Function Name=UH0766, Local Cell ID=94, Cell Name=CELLNAME']
 
 # ===обработка weekly  для всей сети без разбивки на кластера===
 weekly_df = sts_df.groupby(['week'])[list_1]. sum().reset_index()
@@ -2111,6 +2953,13 @@ weekly_df['CCSR3G, %'] = weekly_df['RRC Assignment SucessRate (CS BH), %'] * (10
 weekly_df['DCSR3G, %'] = weekly_df['RRC Assignment SucessRate (PS BH), %'] * (100 - weekly_df['RRC Drop Rate (PS BH), %']) * weekly_df['RAB Assignment Success Rate (PS), %'] * (100 - weekly_df['PS RAB Drop Rate (%)'])/ 1000000
 weekly_df = weekly_df.drop(list_1, axis=1)
 weekly_df_trans = weekly_df.transpose()
+
+weeklyN_df = stsN_df.groupby(['week'])[list_1N]. sum().reset_index()
+weeklyN_df['MeanThrHSDPA,kbps'] = weeklyN_df['VS.HSDPA.DataOutput.Traffic (bit)']/weeklyN_df['VS.HSDPA.DataTtiNum.User (None)'] / 2
+weeklyN_df['MeanThrHSDPA DC,kbps'] = weeklyN_df['VS.DataOutput.AllHSDPA.Traffic (bit)'] / weeklyN_df['VS.AllHSDPA.DataTtiNum.User (None)'] / 2
+weeklyN_df['MeanThrHSUPA,kbps'] = (weeklyN_df['VS.HSUPA.2msTTI.Traffic (kbit)'] + weeklyN_df['VS.HSUPA.10msTTI.Traffic (kbit)']) / (weeklyN_df['VS.HSUPA.2msPDU.TTI.Num (None)'] * 0.002 + weeklyN_df['VS.HSUPA.10msPDU.TTI.Num (None)'] * 0.01)
+weeklyN_df = weeklyN_df.drop(list_1N, axis=1)
+#weeklyN_df_trans = weeklyN_df.transpose()
 
 
 # ===обработка daily===
@@ -2500,6 +3349,35 @@ daily_dfall = pd.merge(daily_dfall, daily_df10637, how="left")
 daily_dfall = pd.merge(daily_dfall, daily_df2937, how="left")
 daily_dfall_trans = daily_dfall.transpose()
 
+
+#NodeB дневная
+dailyN_df = stsN_df.groupby(['date'])[list_1N]. sum().reset_index()
+dailyN_df['MeanThrHSDPA,kbps'] = dailyN_df['VS.HSDPA.DataOutput.Traffic (bit)']/dailyN_df['VS.HSDPA.DataTtiNum.User (None)'] / 2
+dailyN_df['MeanThrHSDPA DC,kbps'] = dailyN_df['VS.DataOutput.AllHSDPA.Traffic (bit)'] / dailyN_df['VS.AllHSDPA.DataTtiNum.User (None)'] / 2
+dailyN_df['MeanThrHSUPA,kbps'] = (dailyN_df['VS.HSUPA.2msTTI.Traffic (kbit)'] + dailyN_df['VS.HSUPA.10msTTI.Traffic (kbit)']) / (dailyN_df['VS.HSUPA.2msPDU.TTI.Num (None)'] * 0.002 + dailyN_df['VS.HSUPA.10msPDU.TTI.Num (None)'] * 0.01)
+dailyN_df = dailyN_df.drop(list_1N, axis=1)
+
+# сортировка по диапазонам
+dailyN_dfU2100 = stsN_df[stsN_df['ULoCell'].isin(list_U2100N)]
+dailyN_dfU2100 = dailyN_dfU2100.groupby(['date'])[list_1N]. sum().reset_index()
+dailyN_dfU2100['MeanThrHSDPAU2100,kbps'] = dailyN_dfU2100['VS.HSDPA.DataOutput.Traffic (bit)']/dailyN_dfU2100['VS.HSDPA.DataTtiNum.User (None)'] / 2
+dailyN_dfU2100['MeanThrHSDPAU2100 DC,kbps'] = dailyN_dfU2100['VS.DataOutput.AllHSDPA.Traffic (bit)'] / dailyN_dfU2100['VS.AllHSDPA.DataTtiNum.User (None)'] / 2
+dailyN_dfU2100['MeanThrHSUPAU2100,kbps'] = (dailyN_dfU2100['VS.HSUPA.2msTTI.Traffic (kbit)'] + dailyN_dfU2100['VS.HSUPA.10msTTI.Traffic (kbit)']) / (dailyN_dfU2100['VS.HSUPA.2msPDU.TTI.Num (None)'] * 0.002 + dailyN_dfU2100['VS.HSUPA.10msPDU.TTI.Num (None)'] * 0.01)
+dailyN_dfU2100 = dailyN_dfU2100.drop(list_1N, axis=1)
+
+dailyN_dfU900 = stsN_df[stsN_df['ULoCell'].isin(list_U900N)]
+dailyN_dfU900 = dailyN_dfU900.groupby(['date'])[list_1N]. sum().reset_index()
+dailyN_dfU900['MeanThrHSDPAU900,kbps'] = dailyN_dfU900['VS.HSDPA.DataOutput.Traffic (bit)']/dailyN_dfU900['VS.HSDPA.DataTtiNum.User (None)'] / 2
+dailyN_dfU900['MeanThrHSDPAU900 DC,kbps'] = dailyN_dfU900['VS.DataOutput.AllHSDPA.Traffic (bit)'] / dailyN_dfU900['VS.AllHSDPA.DataTtiNum.User (None)'] / 2
+dailyN_dfU900['MeanThrHSUPAU900,kbps'] = (dailyN_dfU900['VS.HSUPA.2msTTI.Traffic (kbit)'] + dailyN_dfU900['VS.HSUPA.10msTTI.Traffic (kbit)']) / (dailyN_dfU900['VS.HSUPA.2msPDU.TTI.Num (None)'] * 0.002 + dailyN_dfU900['VS.HSUPA.10msPDU.TTI.Num (None)'] * 0.01)
+dailyN_dfU900 = dailyN_dfU900.drop(list_1N, axis=1)
+
+dailyN_df = pd.merge(dailyN_df, dailyN_dfU2100, how="left")
+dailyN_df = pd.merge(dailyN_df, dailyN_dfU900, how="left")
+#dailyN_df_trans = dailyN_df.transpose()
+
+
+
 # ===обработка часовая===
 hourly_df = sts_df.groupby(['date', 'hour'])[list_1]. sum().reset_index()
 hourly_df['CS traffic 3G, Erl'] = hourly_df['CS Voice Traffic Volume (Erl)']
@@ -2887,6 +3765,33 @@ hourly_dfall = pd.merge(hourly_dfall, hourly_df10637, how="left")
 hourly_dfall = pd.merge(hourly_dfall, hourly_df2937, how="left")
 hourly_dfall_trans = hourly_dfall.transpose()
 
+# NodeB часовая
+hourlyN_df = stsN_df.groupby(['date', 'hour'])[list_1N]. sum().reset_index()
+hourlyN_df['MeanThrHSDPA,kbps'] = hourlyN_df['VS.HSDPA.DataOutput.Traffic (bit)']/hourlyN_df['VS.HSDPA.DataTtiNum.User (None)'] / 2
+hourlyN_df['MeanThrHSDPA DC,kbps'] = hourlyN_df['VS.DataOutput.AllHSDPA.Traffic (bit)'] / hourlyN_df['VS.AllHSDPA.DataTtiNum.User (None)'] / 2
+hourlyN_df['MeanThrHSUPA,kbps'] = (hourlyN_df['VS.HSUPA.2msTTI.Traffic (kbit)'] + hourlyN_df['VS.HSUPA.10msTTI.Traffic (kbit)']) / (hourlyN_df['VS.HSUPA.2msPDU.TTI.Num (None)'] * 0.002 + hourlyN_df['VS.HSUPA.10msPDU.TTI.Num (None)'] * 0.01)
+hourlyN_df = hourlyN_df.drop(list_1N, axis=1)
+
+# сортировка по диапазонам
+hourlyN_dfU2100 = stsN_df[stsN_df['ULoCell'].isin(list_U2100N)]
+hourlyN_dfU2100 = hourlyN_dfU2100.groupby(['date', 'hour'])[list_1N]. sum().reset_index()
+hourlyN_dfU2100['MeanThrHSDPAU2100,kbps'] = hourlyN_dfU2100['VS.HSDPA.DataOutput.Traffic (bit)']/hourlyN_dfU2100['VS.HSDPA.DataTtiNum.User (None)'] / 2
+hourlyN_dfU2100['MeanThrHSDPAU2100 DC,kbps'] = hourlyN_dfU2100['VS.DataOutput.AllHSDPA.Traffic (bit)'] / hourlyN_dfU2100['VS.AllHSDPA.DataTtiNum.User (None)'] / 2
+hourlyN_dfU2100['MeanThrHSUPAU2100,kbps'] = (hourlyN_dfU2100['VS.HSUPA.2msTTI.Traffic (kbit)'] + hourlyN_dfU2100['VS.HSUPA.10msTTI.Traffic (kbit)']) / (hourlyN_dfU2100['VS.HSUPA.2msPDU.TTI.Num (None)'] * 0.002 + hourlyN_dfU2100['VS.HSUPA.10msPDU.TTI.Num (None)'] * 0.01)
+hourlyN_dfU2100 = hourlyN_dfU2100.drop(list_1N, axis=1)
+
+hourlyN_dfU900 = stsN_df[stsN_df['ULoCell'].isin(list_U900N)]
+hourlyN_dfU900 = hourlyN_dfU900.groupby(['date', 'hour'])[list_1N]. sum().reset_index()
+hourlyN_dfU900['MeanThrHSDPAU900,kbps'] = hourlyN_dfU900['VS.HSDPA.DataOutput.Traffic (bit)']/hourlyN_dfU900['VS.HSDPA.DataTtiNum.User (None)'] / 2
+hourlyN_dfU900['MeanThrHSDPAU900 DC,kbps'] = hourlyN_dfU900['VS.DataOutput.AllHSDPA.Traffic (bit)'] / hourlyN_dfU900['VS.AllHSDPA.DataTtiNum.User (None)'] / 2
+hourlyN_dfU900['MeanThrHSUPAU900,kbps'] = (hourlyN_dfU900['VS.HSUPA.2msTTI.Traffic (kbit)'] + hourlyN_dfU900['VS.HSUPA.10msTTI.Traffic (kbit)']) / (hourlyN_dfU900['VS.HSUPA.2msPDU.TTI.Num (None)'] * 0.002 + hourlyN_dfU900['VS.HSUPA.10msPDU.TTI.Num (None)'] * 0.01)
+hourlyN_dfU900 = hourlyN_dfU900.drop(list_1N, axis=1)
+
+hourlyN_df = pd.merge(hourlyN_df, hourlyN_dfU2100, how="left")
+hourlyN_df = pd.merge(hourlyN_df, hourlyN_dfU900, how="left")
+#dailyN_df_trans = dailyN_df.transpose()
+
+
 
 #####
 # обработка busy hour
@@ -2959,6 +3864,17 @@ hourlyCS_df_trans = hourlyCS_df.transpose()
 hourlyPS_df = hourlyPS_df.drop(list_1, axis=1)
 hourlyPS_df_trans = hourlyPS_df.transpose()
 
+# NodeB статистика в чнн
+hourlyPSN_df = stsN_df.groupby(['date', 'hour'])[list_1N]. sum().reset_index()
+max_index_PS = hourlyPSN_df.groupby('date')['VS.HSDPA.DataOutput.Traffic (bit)'].idxmax()
+hourlyPSN_df = hourlyPSN_df.loc[max_index_PS]
+hourlyPSN_df['MeanThrHSDPA,kbps'] = hourlyPSN_df['VS.HSDPA.DataOutput.Traffic (bit)']/hourlyPSN_df['VS.HSDPA.DataTtiNum.User (None)'] / 2
+hourlyPSN_df['MeanThrHSDPA DC,kbps'] = hourlyPSN_df['VS.DataOutput.AllHSDPA.Traffic (bit)'] / hourlyPSN_df['VS.AllHSDPA.DataTtiNum.User (None)'] / 2
+hourlyPSN_df['MeanThrHSUPA,kbps'] = (hourlyPSN_df['VS.HSUPA.2msTTI.Traffic (kbit)'] + hourlyPSN_df['VS.HSUPA.10msTTI.Traffic (kbit)']) / (hourlyPSN_df['VS.HSUPA.2msPDU.TTI.Num (None)'] * 0.002 + hourlyPSN_df['VS.HSUPA.10msPDU.TTI.Num (None)'] * 0.01)
+hourlyPSN_df = hourlyPSN_df.drop(list_1N, axis=1)
+#hourlyPSN_df_trans = hourlyPSN_df.transpose()
+
+
 
 #daily_df.to_excel("C:/test/sts3G/daily_df.xls", engine='openpyxl', sheet_name='Book2')
 #hourlyCS_df.to_excel("C:/test/sts3G/hourly_df.xls", engine='openpyxl', sheet_name='Book2')
@@ -2969,6 +3885,10 @@ with pd.ExcelWriter(f"{directory}{csv_name1}{output_comment}.xlsx", engine='open
     hourly_dfall.to_excel(writer, sheet_name='hourly')
     hourlyCS_df.to_excel(writer, sheet_name='busy_hourCS')
     hourlyPS_df.to_excel(writer, sheet_name='busy_hourPS')
+    weeklyN_df.to_excel(writer, sheet_name='NodeBweekly')
+    dailyN_df.to_excel(writer, sheet_name='NodeBdaily')
+    hourlyN_df.to_excel(writer, sheet_name='NodeBhourly')
+    hourlyPSN_df.to_excel(writer, sheet_name='NodeB_BH')
     weekly_df_trans.to_excel(writer, sheet_name='weekly_trans')
     daily_dfall_trans.to_excel(writer, sheet_name='daily_trans')
     hourly_dfall_trans.to_excel(writer, sheet_name='hourly_trans')
@@ -2990,6 +3910,11 @@ daily_sheet_trans = my_file["daily_trans"]
 hourly_sheet_trans = my_file["hourly_trans"]
 busy_hourCS_sheet_trans = my_file["busy_hourCS_trans"]
 busy_hourPS_sheet_trans = my_file["busy_hourPS_trans"]
+weeklyN_sheet = my_file["NodeBweekly"]
+dailyN_sheet = my_file["NodeBdaily"]
+hourlyN_sheet = my_file["NodeBhourly"]
+hourlyPSN_sheet = my_file["NodeB_BH"]
+
 
 weekly_sheet.column_dimensions["A"].width = 2
 weekly_sheet.column_dimensions["B"].width = 7
@@ -3001,6 +3926,15 @@ busy_hourCS_sheet.column_dimensions["B"].width = 11
 busy_hourPS_sheet.column_dimensions["A"].width = 11
 busy_hourPS_sheet.column_dimensions["B"].width = 11
 
+weeklyN_sheet.column_dimensions["A"].width = 2
+weeklyN_sheet.column_dimensions["B"].width = 7
+dailyN_sheet.column_dimensions["A"].width = 2
+dailyN_sheet.column_dimensions["B"].width = 11
+hourlyN_sheet.column_dimensions["A"].width = 4
+hourlyPSN_sheet.column_dimensions["A"].width = 11
+hourlyPSN_sheet.column_dimensions["B"].width = 11
+
+
 weekly_sheet_trans.column_dimensions["A"].width = 35
 daily_sheet_trans.column_dimensions["A"].width = 35
 hourly_sheet_trans.column_dimensions["A"].width = 35
@@ -3011,12 +3945,21 @@ hourly_sheet.delete_cols(1) # удаляем первые столбцы что�
 busy_hourCS_sheet.delete_cols(1) # удаляем первые столбцы чтобы номера столбцов для всех KPI были одинаковыми как в дневной статистике
 busy_hourPS_sheet.delete_cols(1) # удаляем первые столбцы чтобы номера столбцов для всех KPI были одинаковыми как в дневной статистике
 
+hourlyN_sheet.delete_cols(1) # удаляем первые столбцы чтобы номера столбцов для всех KPI были одинаковыми как в дневной статистике
+hourlyPSN_sheet.delete_cols(1) # удаляем первые столбцы чтобы номера столбцов для всех KPI были одинаковыми как в дневной статистике
+
+
 # определение количества строк в таблицах
 last_row_weekly = weekly_sheet.max_row
 last_row_daily = daily_sheet.max_row
 last_row_hourly = hourly_sheet.max_row
 last_row_BHCS = busy_hourCS_sheet.max_row
 last_row_BHPS = busy_hourPS_sheet.max_row
+
+last_row_weeklyN = weeklyN_sheet.max_row
+last_row_dailyN = dailyN_sheet.max_row
+last_row_hourlyN = hourlyN_sheet.max_row
+last_row_BHPSN = hourlyPSN_sheet.max_row
 
 # выставление правильного формата для столбцов с датами
 for r in range(2,(last_row_daily+1)):
@@ -3027,6 +3970,13 @@ for r in range(2,(last_row_BHCS+1)):
     busy_hourCS_sheet[f'A{r}'].number_format ='DD.MM.YYYY'
 for r in range(2,(last_row_BHPS+1)):
     busy_hourPS_sheet[f'A{r}'].number_format = 'DD.MM.YYYY'
+
+for r in range(2,(last_row_dailyN+1)):
+    dailyN_sheet[f'B{r}'].number_format ='DD.MM.YYYY'
+for r in range(2, (last_row_hourlyN+1)):
+    hourlyN_sheet[f'A{r}'].number_format ='DD'
+for r in range(2,(last_row_BHPSN+1)):
+    hourlyPSN_sheet[f'A{r}'].number_format ='DD.MM.YYYY'
 
 for cell in daily_sheet_trans[2]:
     cell.number_format ='DD.MM.YYYY'
@@ -3046,6 +3996,15 @@ for cell in hourly_sheet[1]:
 for cell in busy_hourCS_sheet[1]:
     cell.alignment = openpyxl.styles.Alignment(wrap_text=True)
 for cell in busy_hourPS_sheet[1]:
+    cell.alignment = openpyxl.styles.Alignment(wrap_text=True)
+
+for cell in weeklyN_sheet[1]:
+    cell.alignment = openpyxl.styles.Alignment(wrap_text=True)
+for cell in dailyN_sheet[1]:
+    cell.alignment = openpyxl.styles.Alignment(wrap_text=True)
+for cell in hourlyN_sheet[1]:
+    cell.alignment = openpyxl.styles.Alignment(wrap_text=True)
+for cell in hourlyPSN_sheet[1]:
     cell.alignment = openpyxl.styles.Alignment(wrap_text=True)
 
 #  графики в недельной таблице weekly_sheet
@@ -3176,6 +4135,30 @@ DCSR3G_chart.add_data(DCSR3G, titles_from_data = True)  #
 DCSR3G_chart.set_categories(x_values)
 DCSR3G_chart.legend.position = 'b'
 weekly_sheet.add_chart(DCSR3G_chart, "A258")
+
+
+MeanThrHSDPAkbps= Reference(weeklyN_sheet, min_col=3, min_row=1, max_row=last_row_weekly)
+MeanThrHSDPADCkbps= Reference(weeklyN_sheet, min_col=4, min_row=1, max_row=last_row_weekly)
+MeanThrHSUPAkbps= Reference(weeklyN_sheet, min_col=5, min_row=1, max_row=last_row_weekly)
+
+MeanThrHSDPA_chart = LineChart()
+MeanThrHSDPA_chart.width = 40
+MeanThrHSDPA_chart.height = 10
+MeanThrHSDPA_chart.add_data(MeanThrHSDPAkbps, titles_from_data = True)  #
+MeanThrHSDPA_chart.add_data(MeanThrHSDPADCkbps, titles_from_data = True)  #
+MeanThrHSDPA_chart.set_categories(x_values)
+MeanThrHSDPA_chart.legend.position = 'b'
+weeklyN_sheet.add_chart(MeanThrHSDPA_chart, "A18")
+
+MeanThrHSUPAkbps_chart = LineChart()
+MeanThrHSUPAkbps_chart.width = 40
+MeanThrHSUPAkbps_chart.height = 10
+MeanThrHSUPAkbps_chart.add_data(MeanThrHSUPAkbps, titles_from_data = True)  #
+MeanThrHSUPAkbps_chart.set_categories(x_values)
+MeanThrHSUPAkbps_chart.legend.position = 'b'
+weeklyN_sheet.add_chart(MeanThrHSUPAkbps_chart, "A38")
+
+
 
 #  графики в суточной таблице daily_sheet   last_row_daily
 x_values = Reference(daily_sheet, range_string=(f"daily!$B$2:$B${last_row_daily}"))
@@ -3431,6 +4414,47 @@ DCSR3G_chart.set_categories(x_values)
 DCSR3G_chart.legend.position = 'b'
 daily_sheet.add_chart(DCSR3G_chart, "A258")
 
+MeanThrHSDPAkbps= Reference(dailyN_sheet, min_col=3, min_row=1, max_row=last_row_daily)
+MeanThrHSDPADCkbps= Reference(dailyN_sheet, min_col=4, min_row=1, max_row=last_row_daily)
+MeanThrHSUPAkbps= Reference(dailyN_sheet, min_col=5, min_row=1, max_row=last_row_daily)
+MeanThrHSDPAU2100kbps= Reference(dailyN_sheet, min_col=6, min_row=1, max_row=last_row_daily)
+MeanThrHSDPAU2100DCkbps= Reference(dailyN_sheet, min_col=7, min_row=1, max_row=last_row_daily)
+MeanThrHSUPAU2100kbps= Reference(dailyN_sheet, min_col=8, min_row=1, max_row=last_row_daily)
+MeanThrHSDPAU900kbps= Reference(dailyN_sheet, min_col=9, min_row=1, max_row=last_row_daily)
+MeanThrHSDPAU900DCkbps= Reference(dailyN_sheet, min_col=10, min_row=1, max_row=last_row_daily)
+MeanThrHSUPAU900kbps= Reference(dailyN_sheet, min_col=11, min_row=1, max_row=last_row_daily)
+
+MeanThrHSDPA_chart = LineChart()
+MeanThrHSDPA_chart.width = 40
+MeanThrHSDPA_chart.height = 10
+MeanThrHSDPA_chart.add_data(MeanThrHSDPAkbps, titles_from_data = True)  #
+MeanThrHSDPA_chart.add_data(MeanThrHSDPAU2100kbps, titles_from_data = True)  #
+MeanThrHSDPA_chart.add_data(MeanThrHSDPAU900kbps, titles_from_data = True)  #
+MeanThrHSDPA_chart.set_categories(x_values)
+MeanThrHSDPA_chart.legend.position = 'b'
+dailyN_sheet.add_chart(MeanThrHSDPA_chart, "A18")
+
+MeanThrHSUPAkbps_chart = LineChart()
+MeanThrHSUPAkbps_chart.width = 40
+MeanThrHSUPAkbps_chart.height = 10
+MeanThrHSUPAkbps_chart.add_data(MeanThrHSUPAkbps, titles_from_data = True)  #
+MeanThrHSUPAkbps_chart.add_data(MeanThrHSUPAU2100kbps, titles_from_data = True)  #
+MeanThrHSUPAkbps_chart.add_data(MeanThrHSUPAU900kbps, titles_from_data = True)  #
+MeanThrHSUPAkbps_chart.set_categories(x_values)
+MeanThrHSUPAkbps_chart.legend.position = 'b'
+dailyN_sheet.add_chart(MeanThrHSUPAkbps_chart, "A38")
+
+MeanThrHSDPADC_chart = LineChart()
+MeanThrHSDPADC_chart.width = 40
+MeanThrHSDPADC_chart.height = 10
+MeanThrHSDPADC_chart.add_data(MeanThrHSDPADCkbps, titles_from_data = True)  #
+MeanThrHSDPADC_chart.add_data(MeanThrHSDPAU2100DCkbps, titles_from_data = True)  #
+MeanThrHSDPADC_chart.add_data(MeanThrHSDPAU900DCkbps, titles_from_data = True)  #
+MeanThrHSDPADC_chart.set_categories(x_values)
+MeanThrHSDPADC_chart.legend.position = 'b'
+dailyN_sheet.add_chart(MeanThrHSDPADC_chart, "A58")
+
+
 # графики почасовые hourly_sheet  last_row_hourly
 x_values = Reference(hourly_sheet, range_string=(f"hourly!$A$2:$B${last_row_hourly}"))
 
@@ -3685,6 +4709,45 @@ DCSR3G_chart.set_categories(x_values)
 DCSR3G_chart.legend.position = 'b'
 hourly_sheet.add_chart(DCSR3G_chart, "A258")
 
+MeanThrHSDPAkbps= Reference(hourlyN_sheet, min_col=3, min_row=1, max_row=last_row_hourly)
+MeanThrHSDPADCkbps= Reference(hourlyN_sheet, min_col=4, min_row=1, max_row=last_row_hourly)
+MeanThrHSUPAkbps= Reference(hourlyN_sheet, min_col=5, min_row=1, max_row=last_row_hourly)
+MeanThrHSDPAU2100kbps= Reference(hourlyN_sheet, min_col=6, min_row=1, max_row=last_row_hourly)
+MeanThrHSDPAU2100DCkbps= Reference(hourlyN_sheet, min_col=7, min_row=1, max_row=last_row_hourly)
+MeanThrHSUPAU2100kbps= Reference(hourlyN_sheet, min_col=8, min_row=1, max_row=last_row_hourly)
+MeanThrHSDPAU900kbps= Reference(hourlyN_sheet, min_col=9, min_row=1, max_row=last_row_hourly)
+MeanThrHSDPAU900DCkbps= Reference(hourlyN_sheet, min_col=10, min_row=1, max_row=last_row_hourly)
+MeanThrHSUPAU900kbps= Reference(hourlyN_sheet, min_col=11, min_row=1, max_row=last_row_hourly)
+
+MeanThrHSDPA_chart = LineChart()
+MeanThrHSDPA_chart.width = 40
+MeanThrHSDPA_chart.height = 10
+MeanThrHSDPA_chart.add_data(MeanThrHSDPAkbps, titles_from_data = True)  #
+MeanThrHSDPA_chart.add_data(MeanThrHSDPAU2100kbps, titles_from_data = True)  #
+MeanThrHSDPA_chart.add_data(MeanThrHSDPAU900kbps, titles_from_data = True)  #
+MeanThrHSDPA_chart.set_categories(x_values)
+MeanThrHSDPA_chart.legend.position = 'b'
+hourlyN_sheet.add_chart(MeanThrHSDPA_chart, "A18")
+
+MeanThrHSUPAkbps_chart = LineChart()
+MeanThrHSUPAkbps_chart.width = 40
+MeanThrHSUPAkbps_chart.height = 10
+MeanThrHSUPAkbps_chart.add_data(MeanThrHSUPAkbps, titles_from_data = True)  #
+MeanThrHSUPAkbps_chart.add_data(MeanThrHSUPAU2100kbps, titles_from_data = True)  #
+MeanThrHSUPAkbps_chart.add_data(MeanThrHSUPAU900kbps, titles_from_data = True)  #
+MeanThrHSUPAkbps_chart.set_categories(x_values)
+MeanThrHSUPAkbps_chart.legend.position = 'b'
+hourlyN_sheet.add_chart(MeanThrHSUPAkbps_chart, "A38")
+
+MeanThrHSDPADC_chart = LineChart()
+MeanThrHSDPADC_chart.width = 40
+MeanThrHSDPADC_chart.height = 10
+MeanThrHSDPADC_chart.add_data(MeanThrHSDPADCkbps, titles_from_data = True)  #
+MeanThrHSDPADC_chart.add_data(MeanThrHSDPAU2100DCkbps, titles_from_data = True)  #
+MeanThrHSDPADC_chart.add_data(MeanThrHSDPAU900DCkbps, titles_from_data = True)  #
+MeanThrHSDPADC_chart.set_categories(x_values)
+MeanThrHSDPADC_chart.legend.position = 'b'
+hourlyN_sheet.add_chart(MeanThrHSDPADC_chart, "A58")
 
 my_file.save(f"{directory}{csv_name1}{output_comment}.xlsx")
 
