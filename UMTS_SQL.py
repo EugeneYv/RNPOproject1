@@ -1,4 +1,5 @@
-﻿import pandas as pd
+import sqlite3
+import pandas as pd
 import winsound
 import openpyxl
 from openpyxl.chart import (LineChart, Reference)
@@ -6,27 +7,52 @@ import openpyxl.styles
 ''' количество активных сот 538!!! - используется для расчёта скорости HSDPA HSUPA на RNC 
 вывод посуточной статистики для UMTS. импортный файл - в МАЕ вывести в формате xlsx два файла, потом в экселе переделать в csv
 '''
+
+# подключаемся к базе данных
+conn = sqlite3.connect('C:/SQLite/firstDB/stsDB.db')
+# создаем курсор для выполнения запросов
+cursor = conn.cursor()
+start_date = '2023-01-09'
+end_date = '2023-03-15' # надо брать на день позже
+
+# используйте операторы сравнения для выборки строк в заданном диапазоне
+query1 = f"SELECT * FROM UMTS_1v2 WHERE `Start Time` >= '{start_date}' AND `Start Time` <= '{end_date}'"
+query2 = f"SELECT * FROM UMTS_2_v2 WHERE `Start Time` >= '{start_date}' AND `Start Time` <= '{end_date}'"
+query3 = f"SELECT * FROM NodeBsts WHERE `Start Time` >= '2023-02-26' AND `Start Time` <= '{end_date}'"
+# выполняем запрос и получаем данные
+cursor.execute(query1)
+data1 = cursor.fetchall()
+data1 = [[None if col == 'NIL' else col for col in row] for row in data1]
+sts1_df = pd.DataFrame(data1, columns=[i[0] for i in cursor.description])
+
+cursor.execute(query2)
+data2 = cursor.fetchall()
+data2 = [[None if col == 'NIL' else col for col in row] for row in data2]
+sts2_df = pd.DataFrame(data2, columns=[i[0] for i in cursor.description])
+sts2dropped_df = sts2_df.drop(['Start Time', 'Period (min)', 'NE Name', 'BSC6910UCell'], axis=1)
+
+cursor.execute(query3)
+data3 = cursor.fetchall()
+data3 = [[None if col == 'NIL' else col for col in row] for row in data3]
+stsN_df = pd.DataFrame(data3, columns=[i[0] for i in cursor.description])
+
 active_cell_number = 471  # количество активных сот !!!!
 
-directory = 'C:/work/Herson_audit/sts/3G/'
-csv_name1 = '3G_counters1(2023-03-20'
-csv_name2 = '3G_counters2(2023-03-20'
-NodeB_name = '3G_NodeB_thr(2023-03-20'
-output_comment = '_output'  # что добавится в конце к названию файла
+directory = 'C:/test2/'
+csv_name1 = '3G'
+output_comment = '_outputall'  # что добавится в конце к названию файла
 
-#sts1_df = pd.read_excel(f"{directory}{csv_name1}.xlsx", header=7, na_values='NIL')
-sts1_df = pd.read_csv(f"{directory}{csv_name1}.csv", sep=";", header=7, na_values='NIL')
 sts1_df['date'] = sts1_df['Start Time'].str.split(' ').str[0]
 sts1_df['hour'] = sts1_df['Start Time'].str.split(' ').str[1]
 sts1_df['date'] = pd.to_datetime(sts1_df['date'])
 sts1_df['week'] = sts1_df['date'].dt.isocalendar().week
 
-#sts2_df = pd.read_excel(f"{directory}{csv_name2}.xlsx", header=7, na_values='NIL')
-sts2_df = pd.read_csv(f"{directory}{csv_name2}.csv", sep=";", header=7, na_values='NIL')
-sts_df = pd.merge(sts1_df, sts2_df, how="left")
+#sts_df = pd.merge(sts1_df, sts2_df, how="left")
+sts_df = pd.concat([sts1_df, sts2dropped_df], ignore_index=False, sort=False, axis=1)
 
-# NodeB статистика
-stsN_df = pd.read_csv(f"{directory}{NodeB_name}.csv", sep=";", header=7, na_values='NIL')
+# with pd.ExcelWriter(f"C:/test2/umts_HSDPAerr.xlsx", engine='openpyxl') as writer:
+#      stsN_df.to_excel(writer, sheet_name='sts_df')
+
 stsN_df['date'] = stsN_df['Start Time'].str.split(' ').str[0]
 stsN_df['hour'] = stsN_df['Start Time'].str.split(' ').str[1]
 stsN_df['date'] = pd.to_datetime(stsN_df['date'])
@@ -2959,7 +2985,7 @@ weeklyN_df['MeanThrHSDPA,kbps'] = weeklyN_df['VS.HSDPA.DataOutput.Traffic (bit)'
 weeklyN_df['MeanThrHSDPA DC,kbps'] = weeklyN_df['VS.DataOutput.AllHSDPA.Traffic (bit)'] / weeklyN_df['VS.AllHSDPA.DataTtiNum.User (None)'] / 2
 weeklyN_df['MeanThrHSUPA,kbps'] = (weeklyN_df['VS.HSUPA.2msTTI.Traffic (kbit)'] + weeklyN_df['VS.HSUPA.10msTTI.Traffic (kbit)']) / (weeklyN_df['VS.HSUPA.2msPDU.TTI.Num (None)'] * 0.002 + weeklyN_df['VS.HSUPA.10msPDU.TTI.Num (None)'] * 0.01)
 weeklyN_df = weeklyN_df.drop(list_1N, axis=1)
-#weeklyN_df_trans = weeklyN_df.transpose()
+weeklyN_df_trans = weeklyN_df.transpose()
 
 
 # ===обработка daily===
@@ -3026,6 +3052,7 @@ daily_df['DCSR3G, %'] = daily_df['RRC Assignment SucessRate (PS BH), %'] * (100 
 daily_df = daily_df.drop(list_1, axis=1)
 
 # фильтрация по U2100
+
 daily_dfU2100 = sts_df[sts_df['BSC6910UCell'].isin(list_U2100)]
 daily_dfU2100 = daily_dfU2100.groupby(['date'])[list_1]. sum().reset_index()
 daily_dfU2100['CS traffic 3G, Erl_U2100'] = daily_dfU2100['CS Voice Traffic Volume (Erl)']
@@ -3771,15 +3798,15 @@ hourlyN_df['MeanThrHSDPA,kbps'] = hourlyN_df['VS.HSDPA.DataOutput.Traffic (bit)'
 hourlyN_df['MeanThrHSDPA DC,kbps'] = hourlyN_df['VS.DataOutput.AllHSDPA.Traffic (bit)'] / hourlyN_df['VS.AllHSDPA.DataTtiNum.User (None)'] / 2
 hourlyN_df['MeanThrHSUPA,kbps'] = (hourlyN_df['VS.HSUPA.2msTTI.Traffic (kbit)'] + hourlyN_df['VS.HSUPA.10msTTI.Traffic (kbit)']) / (hourlyN_df['VS.HSUPA.2msPDU.TTI.Num (None)'] * 0.002 + hourlyN_df['VS.HSUPA.10msPDU.TTI.Num (None)'] * 0.01)
 hourlyN_df = hourlyN_df.drop(list_1N, axis=1)
-
-# сортировка по диапазонам
+#
+# # сортировка по диапазонам
 hourlyN_dfU2100 = stsN_df[stsN_df['ULoCell'].isin(list_U2100N)]
 hourlyN_dfU2100 = hourlyN_dfU2100.groupby(['date', 'hour'])[list_1N]. sum().reset_index()
 hourlyN_dfU2100['MeanThrHSDPAU2100,kbps'] = hourlyN_dfU2100['VS.HSDPA.DataOutput.Traffic (bit)']/hourlyN_dfU2100['VS.HSDPA.DataTtiNum.User (None)'] / 2
 hourlyN_dfU2100['MeanThrHSDPAU2100 DC,kbps'] = hourlyN_dfU2100['VS.DataOutput.AllHSDPA.Traffic (bit)'] / hourlyN_dfU2100['VS.AllHSDPA.DataTtiNum.User (None)'] / 2
 hourlyN_dfU2100['MeanThrHSUPAU2100,kbps'] = (hourlyN_dfU2100['VS.HSUPA.2msTTI.Traffic (kbit)'] + hourlyN_dfU2100['VS.HSUPA.10msTTI.Traffic (kbit)']) / (hourlyN_dfU2100['VS.HSUPA.2msPDU.TTI.Num (None)'] * 0.002 + hourlyN_dfU2100['VS.HSUPA.10msPDU.TTI.Num (None)'] * 0.01)
 hourlyN_dfU2100 = hourlyN_dfU2100.drop(list_1N, axis=1)
-
+#
 hourlyN_dfU900 = stsN_df[stsN_df['ULoCell'].isin(list_U900N)]
 hourlyN_dfU900 = hourlyN_dfU900.groupby(['date', 'hour'])[list_1N]. sum().reset_index()
 hourlyN_dfU900['MeanThrHSDPAU900,kbps'] = hourlyN_dfU900['VS.HSDPA.DataOutput.Traffic (bit)']/hourlyN_dfU900['VS.HSDPA.DataTtiNum.User (None)'] / 2
@@ -4435,7 +4462,7 @@ MeanThrHSDPA_chart.add_data(MeanThrHSDPAU900kbps, titles_from_data = True)  #
 MeanThrHSDPA_chart.set_categories(x_valuesN)
 MeanThrHSDPA_chart.legend.position = 'b'
 dailyN_sheet.add_chart(MeanThrHSDPA_chart, "A18")
-
+#
 MeanThrHSUPAkbps_chart = LineChart()
 MeanThrHSUPAkbps_chart.width = 40
 MeanThrHSUPAkbps_chart.height = 10
